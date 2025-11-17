@@ -1,197 +1,112 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="PointCNN++: Performant Convolution on Native Points — CVPR 2026 Project Page" />
   <title>PointCNN++: Performant Convolution on Native Points</title>
-  <style>
-    :root {
-      --primary: #58a6ff;
-      --dark-bg: #0d1117;
-      --light-bg: #161b22;
-      --text: #c9d1d9;
-      --muted: #8b949e;
-    }
 
-    body {
-      font-family: "Segoe UI", "Noto Sans", sans-serif;
-      margin: 0;
-      background-color: var(--dark-bg);
-      color: var(--text);
-      line-height: 1.6;
-    }
-
-    header {
-      text-align: center;
-      padding: 3rem 1rem;
-      background: linear-gradient(180deg, #11161d, #0d1117);
-    }
-
-    header h1 {
-      font-size: 2.5rem;
-      color: #fff;
-      margin-bottom: 0.5rem;
-    }
-
-    header p.subheadline {
-      font-size: 1.2rem;
-      color: var(--muted);
-      margin-top: 0.5rem;
-    }
-
-    main {
-      max-width: 900px;
-      margin: 3rem auto;
-      padding: 0 1rem;
-    }
-
-    section {
-      margin-bottom: 3rem;
-    }
-
-    h2 {
-      color: var(--primary);
-      border-left: 4px solid var(--primary);
-      padding-left: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .video-container {
-      text-align: center;
-      background: var(--light-bg);
-      padding: 1rem;
-      border-radius: 6px;
-    }
-
-    video {
-      width: 100%;
-      max-width: 800px;
-      border-radius: 8px;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 0.6em 1.4em;
-      color: #fff;
-      background: var(--primary);
-      border-radius: 4px;
-      text-decoration: none;
-      margin-top: 1rem;
-      transition: background 0.3s ease;
-    }
-
-    .btn:hover {
-      background: #007aff;
-    }
-
-    .authors {
-      text-align: center;
-      line-height: 1.6;
-    }
-
-    .authors a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    footer {
-      text-align: center;
-      padding: 2rem 1rem;
-      background: #000;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    img.figure {
-      width: 100%;
-      border-radius: 8px;
-      background: var(--light-bg);
-      padding: 10px;
-      box-sizing: border-box;
-    }
-
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 2rem;
-      }
-      video {
-        max-width: 100%;
-      }
-    }
-  </style>
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 </head>
 
 <body>
-  <header>
-    <h1>PointCNN++: Performant Convolution on Native Points</h1>
-    <p class="subheadline">CVPR 2026 Submission #10534</p>
-    <p class="subheadline">Anonymous Authors (for review)</p>
+  <!-- ===== Navbar ===== -->
+  <nav class="navbar">
+    <div class="logo"><a href="#top">PointCNN++</a></div>
+    <div class="nav-links">
+      <a href="#abstract">Abstract</a>
+      <a href="#video">Video</a>
+      <a href="#overview">Method</a>
+      <a href="#results">Results</a>
+      <a href="#authors">Authors</a>
+      <a href="#bibtex">BibTeX</a>
+    </div>
+  </nav>
+
+  <!-- ===== Header ===== -->
+  <header id="top">
+    <h1>PointCNN++</h1>
+    <p class="subtitle">Performant Convolution on Native Points</p>
+    <p class="subinfo">CVPR 2026 | Paper ID #10534</p>
   </header>
 
+  <!-- ===== Main Content ===== -->
   <main>
-    <section id="abstract">
-      <h2>摘要</h2>
+    <section id="abstract" class="fade-in">
+      <h2>Abstract</h2>
       <p>
-        我们提出 <strong>PointCNN++</strong> —— 一种在原生点云上实现高性能卷积的新架构，克服了点云学习中“精度 vs. 性能”的长期矛盾。
-        本方法从体素卷积推广到连续点级卷积，使用基于 Matrix-Vector Multiplication and Reduction (MVMR) 的统一计算框架，
-        并提供专用 GPU kernel 实现高效计算。实验结果表明，PointCNN++ 在内存占用降低一个数量级的同时显著提升速度与注册精度。
+        We propose <strong>PointCNN++</strong>, a novel architecture that resolves the long-standing trade-off between geometric precision
+        and computational performance in learning from 3D point clouds. PointCNN++ generalizes sparse convolution from discrete voxels
+        to continuous points, formulating convolution as a <em>Matrix-Vector Multiplication and Reduction (MVMR)</em> problem with a dedicated
+        GPU kernel for native computation. Our experiments show that PointCNN++ achieves an order of magnitude less memory consumption and
+        several times faster performance than representative point-based methods, while improving registration accuracy.
       </p>
-      <a class="btn" href="papers/PointCNN++_CVPR2026.pdf">📄 下载论文（PDF）</a>
+      <a class="btn" href="papers/PointCNN++_CVPR2026.pdf" target="_blank">📄 Download Paper (PDF)</a>
     </section>
 
-    <section id="video">
-      <h2>展示视频</h2>
+    <section id="video" class="fade-in">
+      <h2>Video Presentation</h2>
       <div class="video-container">
         <video controls autoplay loop muted>
           <source src="assets/videos/demo.mp4" type="video/mp4" />
-          您的浏览器不支持视频播放。
+          Your browser does not support the video tag.
         </video>
       </div>
     </section>
 
-    <section id="overview">
-      <h2>方法概览</h2>
-      <img class="figure" src="assets/images/overview_fig.png" alt="方法概览图" />
+    <section id="overview" class="fade-in">
+      <h2>Method Overview</h2>
+      <img class="figure" src="assets/images/overview_fig.png" alt="Method Overview Figure" />
       <p>
-        PointCNN++ 将卷积的感受野定位在原始点坐标上，结合局部自适应体素化，以最大程度保留几何精度。
-        同时通过MVMR并行机制实现零额外内存开销，实现高保真与高性能的统一。
+        PointCNN++ centers the receptive field directly on the original point coordinates and conducts adaptive local voxelization
+        only within each neighborhood to align with convolution kernels. This design preserves geometric fidelity while decoupling
+        kernel resolution from global voxel quantization. The MVMR formulation enables a zero-memory-overhead GPU implementation,
+        ensuring both high fidelity and high performance.
       </p>
     </section>
 
-    <section id="results">
-      <h2>实验结果</h2>
-      <img class="figure" src="assets/images/results_fig.png" alt="实验结果图" />
+    <section id="results" class="fade-in">
+      <h2>Experimental Results</h2>
+      <img class="figure" src="assets/images/results_fig.png" alt="Experimental Results Figure" />
       <p>
-        实验显示，PointCNN++ 在KITTI和3DMatch基准上均显著超越现有方法，在点云注册任务中取得99.8%的召回率，RTE降低至0.19m。
+        On <strong>KITTI</strong> and <strong>3DMatch</strong> benchmarks, PointCNN++ outperforms existing methods even without task-specific tuning.
+        Plugging our backbone into the classic FCGF pipeline improves registration recall to <strong>99.8%</strong> and reduces RTE to <strong>0.19 m</strong>,
+        while consuming 10× less GPU memory and achieving faster forward/backward passes than both point- and voxel-based baselines.
       </p>
     </section>
 
-    <section id="authors">
-      <h2>作者团队</h2>
+    <section id="authors" class="fade-in">
+      <h2>Authors</h2>
       <div class="authors">
         <p>
-          张三<sup>1</sup>，李四<sup>2</sup>，王五<sup>3</sup><br />
-          <sup>1</sup>北京大学 &nbsp; <sup>2</sup>清华大学 &nbsp; <sup>3</sup>NVIDIA Research<br />
-          联系邮箱: <a href="mailto:pointcnnpp@cvpr2026.org">pointcnnpp@cvpr2026.org</a>
+          John Doe<sup>1</sup>, Jane Smith<sup>2</sup>, and Alex Johnson<sup>3</sup><br/>
+          <sup>1</sup>Peking University&nbsp;&nbsp;
+          <sup>2</sup>Tsinghua University&nbsp;&nbsp;
+          <sup>3</sup>NVIDIA Research
         </p>
+        <p>Contact: <a href="mailto:pointcnnpp@cvpr2026.org">pointcnnpp@cvpr2026.org</a></p>
       </div>
     </section>
 
-    <section id="bibtex">
-      <h2>引用</h2>
-      <pre style="background:#0d1117; color:#58a6ff; padding:1em; border-radius:6px; overflow-x:auto;">
-@article{PointCNNpp2026,
+    <section id="bibtex" class="fade-in">
+      <h2>BibTeX</h2>
+      <pre class="bibtex">@article{PointCNNpp2026,
   title={PointCNN++: Performant Convolution on Native Points},
   author={Anonymous Authors},
   journal={CVPR},
   year={2026}
-}
-      </pre>
+}</pre>
     </section>
   </main>
 
+  <!-- ===== Footer ===== -->
   <footer>
-    <p>© 2025 PointCNN++ Project. Hosted on <a href="https://github.com" target="_blank" style="color:#58a6ff;">GitHub Pages</a>.</p>
+    <p>© 2025 PointCNN++ Project | Hosted on <a href="https://github.com" target="_blank">GitHub Pages</a></p>
   </footer>
+
+  <!-- JS -->
+  <script src="script.js"></script>
 </body>
 </html>
