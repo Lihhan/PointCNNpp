@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,119 +7,99 @@
   <title>PointCNN++: Performant Convolution on Native Points</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-
   <style>
-    /* ====== Reset & Base ====== */
+    /* ===== Reset & Base ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
+    body {
       background-color: #fff;
       color: #212121;
-      font-family: "Inter", sans-serif;
-      line-height: 1.7;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
       overflow-x: hidden;
       scroll-behavior: smooth;
     }
-
-    a { color: #0a66c2; text-decoration: none; transition: 0.25s ease; }
+    a { color: #1e73be; text-decoration: none; transition: color 0.25s ease; }
     a:hover { color: #004a99; }
 
-    /* ====== Header Section ====== */
+    /* ===== Header Section ===== */
     header {
-      text-align: center;
-      padding: 100px 20px 40px;
-      border-bottom: 1px solid #eaeaea;
       position: relative;
+      text-align: center;
+      padding: 120px 20px 50px;
+      background: #f5f7f8;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     header h1 {
-      font-size: 3rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
+      font-size: 4rem;
+      font-weight: 700;
       color: #111;
-      margin-bottom: 10px;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeUp 0.8s ease forwards;
+      margin-bottom: 20px;
     }
 
     header .subtitle {
-      font-size: 1.15rem;
+      font-size: 1.25rem;
       color: #555;
       font-weight: 400;
-      opacity: 0;
-      transform: translateY(15px);
-      animation: fadeUp 0.8s ease 0.2s forwards;
       margin-bottom: 25px;
     }
 
     header .authors {
-      font-size: 0.9rem;
+      font-size: 1rem;
       color: #666;
-      opacity: 0;
-      transform: translateY(12px);
-      animation: fadeUp 0.8s ease 0.4s forwards;
+      margin-bottom: 20px;
     }
 
     header img {
       width: 100%;
       max-width: 800px;
       border-radius: 6px;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.06);
-      margin-top: 25px;
-      opacity: 0;
-      transform: translateY(10px);
-      animation: fadeUp 0.8s ease 0.6s forwards;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      margin-top: 30px;
     }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ====== Sticky Navbar ====== */
+    /* ===== Sticky Navbar ===== */
     .navbar {
       position: fixed;
-      top: -70px;
+      top: 0;
       left: 0;
       width: 100%;
       background: rgba(255, 255, 255, 0.95);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      transition: top 0.4s ease;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       z-index: 999;
       backdrop-filter: blur(6px);
+      transition: top 0.4s ease;
     }
 
-    .navbar.visible { top: 0; }
-
-    .nav-content {
+    .navbar .nav-content {
       display: flex;
       justify-content: center;
-      gap: 32px;
-      padding: 12px 0;
-      font-size: 0.95rem;
-      font-weight: 500;
+      gap: 40px;
+      padding: 15px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
     }
 
-    .nav-content a {
+    .navbar a {
       color: #333;
+      text-transform: uppercase;
     }
 
-    .nav-content a:hover {
+    .navbar a:hover {
       color: #0a66c2;
     }
 
-    /* ====== Main Content ====== */
+    /* ===== Main Content ===== */
     main {
-      width: 90%;
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
-      padding: 70px 0;
+      padding: 70px 20px;
     }
 
     section {
-      margin-top: 60px;
-      border-bottom: 1px solid #f1f1f1;
-      padding-bottom: 60px;
+      margin-top: 50px;
+      padding-bottom: 50px;
+      border-bottom: 1px solid #eee;
     }
 
     section:last-of-type {
@@ -127,44 +107,40 @@
     }
 
     h2 {
-      font-size: 1.6em;
+      font-size: 1.75rem;
       margin-bottom: 20px;
       color: #111;
-      border-left: 3px solid #333;
-      padding-left: 12px;
+      border-left: 3px solid #1e73be;
+      padding-left: 15px;
       font-weight: 600;
     }
 
-    p { margin-bottom: 1rem; color: #343434; }
+    p {
+      margin-bottom: 1.5rem;
+      color: #333;
+      font-size: 1.05rem;
+    }
 
     .figure, video {
       width: 100%;
       border-radius: 6px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-      margin-top: 15px;
-      transition: 0.25s ease;
+      margin-top: 20px;
     }
 
-    .figure:hover, video:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    }
-
-    /* ====== Footer ====== */
+    /* ===== Footer ===== */
     footer {
       text-align: center;
-      padding: 50px 0 30px;
+      padding: 40px 20px;
       color: #666;
-      font-size: 0.9rem;
-      border-top: 1px solid #eaeaea;
+      font-size: 0.95rem;
+      border-top: 1px solid #eee;
     }
 
     footer a {
-      color: #0a66c2;
-      font-weight: 500;
+      color: #1e73be;
     }
 
-    /* ===== Fade-in Animation on Scroll ===== */
+    /* ===== Scroll Behavior ===== */
     .fade-in {
       opacity: 0;
       transform: translateY(10px);
@@ -182,10 +158,10 @@
   <!-- ===== Header ===== -->
   <header>
     <h1>PointCNN++: Performant Convolution on Native Points</h1>
-    <p class="subtitle">Performant Convolution on Native Points</p>
+    <p class="subtitle">Efficient and Accurate 3D Point Cloud Learning</p>
     <div class="authors">
       <p>
-        Lihan Li<sup>1</sup>, Haofeng Zhong<sup>2</sup>, Rui Bu<sup>3</sup>, Minghao Sun<sup>4</sup><br/>
+        Lihan Li<sup>1</sup>, Haofeng Zhong<sup>2</sup>, Rui Bu<sup>3</sup>, Minghao Sun<sup>4</sup><br />
         <sup>1</sup>Peking University&nbsp;&nbsp;|&nbsp;CVPR 2026
       </p>
       <p>Contact: <a href="mailto:lh_li@stu.pku.edu.cn">lh_li@stu.pku.edu.cn</a></p>
@@ -194,11 +170,11 @@
   </header>
 
   <!-- ===== Sticky Navbar ===== -->
-  <nav class="navbar" id="navbar">
+  <nav class="navbar">
     <div class="nav-content">
       <a href="#abstract">Abstract</a>
       <a href="#video">Video</a>
-      <a href="#overview">Overview</a>
+      <a href="#overview">Method</a>
       <a href="#results">Results</a>
     </div>
   </nav>
@@ -227,22 +203,30 @@
     <section id="overview" class="fade-in">
       <h2>Method Overview</h2>
       <img class="figure" src="assets/teaser.png" alt="Method Overview Figure" />
+      <img class="figure" src="assets/teaser2.png" alt="Experimental Results Figure" />
       <p>
-        PointCNN++ centers the receptive field directly on the original point coordinates and conducts adaptive local voxelization
-        only within each neighborhood to align with convolution kernels. This design preserves geometric fidelity while decoupling
-        kernel resolution from global voxel quantization. The MVMR formulation enables a zero-memory-overhead GPU implementation,
-        ensuring both high fidelity and high performance.
+        PointCNN++ centers the receptive field directly on the original point coordinates and conducts adaptive local voxelization only within each neighborhood to align with convolution kernels. This design preserves geometric fidelity while decoupling kernel resolution from global voxel quantization. The MVMR formulation enables a zero-memory-overhead GPU implementation, ensuring both high fidelity and high performance.
       </p>
     </section>
 
     <section id="results" class="fade-in">
       <h2>Experimental Results</h2>
-      <img class="figure" src="assets/performance.png" alt="Experimental Results Figure" />
-      <p>
-        On <strong>KITTI</strong> and <strong>3DMatch</strong> benchmarks, PointCNN++ outperforms existing methods even without task-specific tuning.
-        Plugging our backbone into the classic FCGF pipeline improves registration recall to <strong>99.8%</strong> and reduces RTE to <strong>0.19 m</strong>,
-        while consuming 10× less GPU memory and achieving faster forward/backward passes than both point- and voxel-based baselines.
-      </p>
+
+      <!-- Registration Block -->
+      <div class="results-block">
+        <h3>Registration</h3>
+        <img class="figure" src="assets/performance.png" alt="Experimental Results Figure" />
+        <p>
+          On <strong>KITTI</strong> and <strong>3DMatch</strong> benchmarks, PointCNN++ outperforms existing methods even without task-specific tuning.
+          Plugging our backbone into the classic FCGF pipeline improves registration recall to <strong>99.8%</strong> and reduces RTE to <strong>0.19 m</strong>,
+          while consuming 10× less GPU memory and achieving faster forward/backward passes than both point- and voxel-based baselines.
+        </p>
+      </div>
+
+      <!-- Segmentation Block -->
+      <div class="results-block">
+        <h3>Segmentation</h3>
+      </div>
     </section>
   </main>
 
@@ -252,8 +236,8 @@
   </footer>
 
   <script>
-    // Sticky Navbar
-    const navbar = document.getElementById("navbar");
+    // Sticky Navbar Visibility
+    const navbar = document.querySelector(".navbar");
     window.addEventListener("scroll", () => {
       if (window.scrollY > 150) {
         navbar.classList.add("visible");
@@ -262,7 +246,7 @@
       }
     });
 
-    // Fade-in on scroll
+    // Fade-in effect on scroll
     const faders = document.querySelectorAll(".fade-in");
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
