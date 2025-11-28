@@ -67,14 +67,14 @@ opacity:0.95;
 
 /* Sections */
 section{
-padding:2rem 2rem; /* Reduced from 3rem */
+padding:2rem 2rem;
 max-width:1400px;
 margin:auto;
 }
 
 h2{
 font-size:1.8rem;
-margin-bottom:1.5rem; /* Reduced from 2rem */
+margin-bottom:1.5rem;
 text-align:center;
 color:var(--text);
 font-weight:700;
@@ -101,8 +101,8 @@ box-shadow:var(--shadow-hover);
 .kernel-section{
 background:var(--surface);
 border-radius:16px;
-padding:2rem 2rem; /* Reduced from 3rem */
-margin:1.5rem 0; /* Reduced from 2rem */
+padding:2rem 2rem;
+margin:1.5rem 0;
 box-shadow:var(--shadow);
 }
 
@@ -110,7 +110,7 @@ box-shadow:var(--shadow);
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
 gap:3rem;
-margin-top:1.5rem; /* Reduced from 2rem */
+margin-top:1.5rem;
 }
 
 .kernel-card{
@@ -143,16 +143,16 @@ font-size:1.1rem;
 .kernel-3d-section{
 background:var(--surface);
 border-radius:16px;
-padding:2rem 2rem; /* Reduced from 3rem */
-margin:1.5rem 0; /* Reduced from 2rem */
+padding:2rem 2rem;
+margin:1.5rem 0;
 box-shadow:var(--shadow);
 }
 
 .kernel-3d-grid{
 display:grid;
-grid-template-columns:1fr 2fr; /* Left smaller, right larger */
+grid-template-columns:1fr 2fr;
 gap:2rem;
-margin-top:1.5rem; /* Reduced from 2rem */
+margin-top:1.5rem;
 }
 
 .kernel-3d-card{
@@ -176,7 +176,7 @@ display:block;
 display:flex;
 justify-content:center;
 gap:1rem;
-margin:2rem 0; /* Reduced from 3rem */
+margin:2rem 0;
 }
 
 .toggle button{
@@ -208,7 +208,7 @@ box-shadow:0 4px 12px rgba(82,109,130,0.3);
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(500px,1fr));
 gap:2rem;
-margin-top:1.5rem; /* Reduced from 2rem */
+margin-top:1.5rem;
 }
 
 .chart-container{
@@ -262,7 +262,7 @@ Lihan Li<sup>*</sup> · Haofeng Zhong<sup>*</sup> · Rui Bu · Mingchao Sun · W
 <p style="font-size:1.1rem;text-align:center;max-width:900px;margin:0 auto;line-height:1.7;">
 3D point cloud convolutions are usually either point-based, keeping geometric detail but slow, or voxel-based, fast but losing precision.
 
-PointCNN++ bridges this gap by extending sparse convolution from voxels to points. It keeps each point’s true coordinates and runs efficiently through a custom GPU kernel based on Matrix–Vector Multiplication and Reduction (MVMR).
+PointCNN++ bridges this gap by extending sparse convolution from voxels to points. It keeps each point's true coordinates and runs efficiently through a custom GPU kernel based on Matrix–Vector Multiplication and Reduction (MVMR).
 
 It uses up to 10× less memory, runs several times faster, and improves registration accuracy over existing voxel and point methods — proving that high precision and high performance can coexist in 3D learning.
 
@@ -340,7 +340,7 @@ It uses up to 10× less memory, runs several times faster, and improves registra
 Chart.defaults.color = '#1a1a1a';
 Chart.defaults.borderColor = 'rgba(0,0,0,0.1)';
 
-// 3D Kernel Visualization - Draw as actual 3D cube with 27 smaller cubes
+// 3D Kernel Visualization
 function draw3DKernel(canvas) {
 const ctx = canvas.getContext('2d');
 const dpr = window.devicePixelRatio || 1;
@@ -494,7 +494,7 @@ requestAnimationFrame(drawKernel);
 drawKernel();
 }
 
-// Large Point Cloud with 3D Kernel Cavity Overlay - 点云静止不动
+// Modified Point Cloud Grouping Demo with precise 3D->1D mapping
 function drawGroupingDemo(canvas) {
 const ctx = canvas.getContext('2d');
 const dpr = window.devicePixelRatio || 1;
@@ -509,9 +509,9 @@ ctx.scale(dpr, dpr);
 const w = rect.width, h = rect.height;
 let frame = 0;
 
-// Generate static background points covering full space
+// Generate static background points
 const bgPoints = [];
-const totalPoints = 400;
+const totalPoints = 300;
 
 for(let i = 0; i < totalPoints; i++) {
 let x, y, density;
@@ -542,7 +542,28 @@ size: 1 + density
 });
 }
 
-// Generate static points for each cavity
+// Create precise mapping from 3D cube positions to 1D weight indices
+const positionToWeightMapping = [];
+let weightIndex = 0;
+
+// Traverse 3D cube in z,y,x order (same as kernel generation)
+for(let z = 0; z < 3; z++) {
+for(let y = 0; y < 3; y++) {
+for(let x = 0; x < 3; x++) {
+const isCenter = (x === 1 && y === 1 && z === 1);
+if(isCenter) continue;
+                
+positionToWeightMapping.push({
+pos3D: {x, y, z},
+weightId: weightIndex + 1,
+relativePos: {x: x - 1, y: y - 1, z: z - 1} // relative to center
+});
+weightIndex++;
+}
+}
+}
+
+// Generate point clusters precisely mapped to 3D positions
 const kernelX = w/2;
 const kernelY = h/2;
 const kernelScale = 35;
@@ -550,41 +571,36 @@ const cavitySize = kernelScale * 0.7;
 const spacing = kernelScale * 0.85;
 const cavityPoints = [];
 
-let cavityIndex = 0;
-for(let z = 0; z < 3; z++) {
-for(let y = 0; y < 3; y++) {
-for(let x = 0; x < 3; x++) {
-const isCenter = (x === 1 && y === 1 && z === 1);
-if(isCenter) continue;
-                
+positionToWeightMapping.forEach(mapping => {
+const {x, y, z} = mapping.pos3D;
 const x3d = (x - 1) * spacing;
 const y3d = (y - 1) * spacing;
 const z3d = (z - 1) * spacing;
-                
+        
+// Calculate cavity position using same projection as 3D kernel
 const cavityX = kernelX + x3d + z3d * 0.3;
 const cavityY = kernelY + y3d - z3d * 0.2;
-                
+        
 const pointsInCavity = [];
-const numPoints = 10 + Math.floor(Math.random() * 15);
-                
+const numPoints = 8 + Math.floor(Math.random() * 12);
+        
 for(let p = 0; p < numPoints; p++) {
 pointsInCavity.push({
 x: cavityX + (Math.random() - 0.5) * (cavitySize * 0.9),
 y: cavityY + (Math.random() - 0.5) * (cavitySize * 0.9)
 });
 }
-                
+        
 cavityPoints.push({
 cavityX: cavityX,
 cavityY: cavityY,
-weightId: cavityIndex + 1,
-points: pointsInCavity
+weightId: mapping.weightId,
+pos3D: mapping.pos3D,
+relativePos: mapping.relativePos,
+points: pointsInCavity,
+color: `hsl(${((mapping.weightId-1) * 14) % 360}, 70%, 60%)`
 });
-                
-cavityIndex++;
-}
-}
-}
+});
 
 function drawGrouping() {
 ctx.clearRect(0, 0, w, h);
@@ -627,53 +643,97 @@ ctx.font = 'bold 12px Inter, sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('3×3×3 Kernel Region', kernelX, kernelY - kernelScale * 1.8);
     
-const currentProcessingId = Math.floor(frame / 60) % 26 + 1;
+// Current processing weight (cycles through 1-26)
+const currentProcessingId = Math.floor(frame / 80) % 26 + 1;
+const currentMapping = positionToWeightMapping.find(m => m.weightId === currentProcessingId);
     
 // Draw cavities and static points
 cavityPoints.forEach(cavity => {
 const isProcessing = (cavity.weightId === currentProcessingId);
         
 // Draw cavity outline
-ctx.strokeStyle = isProcessing ? '#ff6b6b' : '#526d82';
+ctx.strokeStyle = isProcessing ? '#ff6b6b' : cavity.color;
 ctx.lineWidth = isProcessing ? 3 : 1.5;
 ctx.globalAlpha = isProcessing ? 1 : 0.4;
         
 ctx.strokeRect(cavity.cavityX - cavitySize/2, cavity.cavityY - cavitySize/2, 
 cavitySize, cavitySize);
         
-// Draw static points in cavity
+// Draw points in cavity
 cavity.points.forEach(point => {
 if(isProcessing) {
 // Highlight when processing
-ctx.fillStyle = 'rgba(255, 107, 107, 0.8)';
+const progress = (frame % 80) / 80;
+const alpha = 0.6 + 0.4 * Math.sin(progress * Math.PI * 4);
+const size = 2 + Math.sin(progress * Math.PI * 6) * 0.5;
+                
+ctx.globalAlpha = alpha;
+ctx.fillStyle = '#ff6b6b';
 ctx.beginPath();
-ctx.arc(point.x, point.y, 2, 0, Math.PI * 2);
+ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
 ctx.fill();
+                
+// Processing glow effect
+if(progress > 0.3) {
+ctx.strokeStyle = '#ff6b6b';
+ctx.lineWidth = 1.5;
+ctx.globalAlpha = 0.3;
+ctx.beginPath();
+ctx.arc(point.x, point.y, size + 2, 0, Math.PI * 2);
+ctx.stroke();
+}
 } else {
 // Regular static points
-ctx.fillStyle = 'rgba(82, 109, 130, 0.5)';
+ctx.fillStyle = cavity.color;
+ctx.globalAlpha = 0.6;
 ctx.beginPath();
 ctx.arc(point.x, point.y, 1.5, 0, Math.PI * 2);
 ctx.fill();
 }
 });
         
-// Weight ID label for processing cavity
+// Weight ID and position label for processing cavity
 if(isProcessing) {
+ctx.globalAlpha = 1;
 ctx.fillStyle = '#ff6b6b';
 ctx.font = 'bold 11px Inter, sans-serif';
 ctx.textAlign = 'center';
-ctx.fillText(`Weight ${cavity.weightId}`, cavity.cavityX, cavity.cavityY - cavitySize/2 - 8);
+ctx.fillText(`Weight ${cavity.weightId}`, cavity.cavityX, cavity.cavityY - cavitySize/2 - 18);
+            
+ctx.font = '9px Inter, sans-serif';
+ctx.fillText(`Pos(${cavity.relativePos.x},${cavity.relativePos.y},${cavity.relativePos.z})`, 
+cavity.cavityX, cavity.cavityY - cavitySize/2 - 6);
 }
         
 ctx.globalAlpha = 1;
 });
     
-// Processing status
+// Processing status with 3D position info
 ctx.fillStyle = '#526d82';
 ctx.font = '12px Inter, sans-serif';
 ctx.textAlign = 'left';
-ctx.fillText(`Current Weight ID: ${currentProcessingId}/26`, 20, h - 20);
+ctx.fillText(`Current Weight ID: ${currentProcessingId}/26`, 20, h - 40);
+
+if(currentMapping) {
+ctx.fillText(`3D Position: (${currentMapping.relativePos.x}, ${currentMapping.relativePos.y}, ${currentMapping.relativePos.z})`, 20, h - 25);
+}
+
+// Progress indicator
+const progressWidth = 120;
+const progressX = w - progressWidth - 20;
+const progressY = h - 35;
+
+ctx.fillStyle = '#e5e7eb';
+ctx.fillRect(progressX, progressY, progressWidth, 8);
+
+const progress = (currentProcessingId - 1 + (frame % 80) / 80) / 26;
+ctx.fillStyle = '#526d82';
+ctx.fillRect(progressX, progressY, progressWidth * progress, 8);
+
+ctx.fillStyle = '#1a1a1a';
+ctx.font = '10px Inter, sans-serif';
+ctx.textAlign = 'right';
+ctx.fillText(`${Math.floor(progress * 100)}%`, progressX + progressWidth, progressY - 5);
     
 frame++;
 requestAnimationFrame(drawGrouping);
@@ -697,7 +757,7 @@ ctx.scale(dpr, dpr);
 const w = rect.width, h = rect.height;
 let frame = 0;
 
-// Generate 26 positions (excluding center)
+// Generate 26 positions (excluding center) with exact ordering
 const positions3D = [];
 let posIndex = 0;
 for(let z = 0; z < 3; z++) {
@@ -841,7 +901,7 @@ requestAnimationFrame(drawFlattening);
 drawFlattening();
 }
 
-// Sequential Weight Processing with Point Clusters
+// Sequential Weight Processing with Precise Mapping
 function drawSequentialProcessing(canvas) {
 const ctx = canvas.getContext('2d');
 const dpr = window.devicePixelRatio || 1;
@@ -856,36 +916,51 @@ ctx.scale(dpr, dpr);
 const w = rect.width, h = rect.height;
 let frame = 0;
 
-// Generate weight array at top
-const weights = [];
-for(let i = 1; i <= 26; i++) {
-weights.push({
-id: i,
-color: `hsl(${((i-1) * 14) % 360}, 70%, 60%)`
+// Create precise mapping (same order as flattening)
+const weightMapping = [];
+let weightIndex = 0;
+
+for(let z = 0; z < 3; z++) {
+for(let y = 0; y < 3; y++) {
+for(let x = 0; x < 3; x++) {
+const isCenter = (x === 1 && y === 1 && z === 1);
+if(isCenter) continue;
+                
+weightMapping.push({
+id: weightIndex + 1,
+pos3D: {x, y, z},
+relativePos: {x: x - 1, y: y - 1, z: z - 1},
+color: `hsl(${(weightIndex * 14) % 360}, 70%, 60%)`
 });
+weightIndex++;
+}
+}
 }
 
-// Generate point clusters for each weight
-const pointClusters = [];
-for(let i = 0; i < 26; i++) {
-const cluster = [];
+// Generate clusters with consistent spatial distribution
+const clusters = weightMapping.map((weight, idx) => {
+// Use position info to determine cluster location
+const baseX = 50 + (weight.pos3D.x / 3) * (w - 100);
+const baseY = 100 + (weight.pos3D.y / 3) * (h - 200) + (weight.pos3D.z / 3) * 30;
+    
 const numPoints = 8 + Math.floor(Math.random() * 12);
-const clusterCenterX = 30 + Math.random() * (w - 60);
-const clusterCenterY = 120 + Math.random() * (h - 180);
-        
+const points = [];
+    
 for(let j = 0; j < numPoints; j++) {
-cluster.push({
-x: clusterCenterX + (Math.random() - 0.5) * 40,
-y: clusterCenterY + (Math.random() - 0.5) * 40
+points.push({
+x: baseX + (Math.random() - 0.5) * 50,
+y: baseY + (Math.random() - 0.5) * 40
 });
 }
-        
-pointClusters.push({
-weightId: i + 1,
-points: cluster,
-color: weights[i].color
+    
+return {
+weightId: weight.id,
+pos3D: weight.pos3D,
+relativePos: weight.relativePos,
+points: points,
+color: weight.color
+};
 });
-}
 
 function drawProcessing() {
 ctx.clearRect(0, 0, w, h);
@@ -896,12 +971,12 @@ ctx.font = 'bold 14px Inter, sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('Sequential Weight Processing', w/2, 20);
 
-// Draw weight array at top
+// Draw weight array at top (flattened order)
 const weightY = 45;
 const weightSize = 10;
 const weightSpacing = (w - 40) / 26;
         
-weights.forEach((weight, idx) => {
+weightMapping.forEach((weight, idx) => {
 const weightX = 20 + idx * weightSpacing;
 ctx.fillStyle = weight.color;
 ctx.fillRect(weightX, weightY, weightSize, weightSize);
@@ -913,8 +988,8 @@ ctx.fillText(weight.id.toString(), weightX + weightSize/2, weightY + 7);
 });
 
 // Current processing weight
-const currentWeightIdx = Math.floor(frame / 80) % 26;
-const processingWeight = weights[currentWeightIdx];
+const currentWeightIdx = Math.floor(frame / 90) % 26;
+const currentWeight = weightMapping[currentWeightIdx];
 
 // Highlight current weight
 const currentWeightX = 20 + currentWeightIdx * weightSpacing;
@@ -922,26 +997,26 @@ ctx.strokeStyle = '#ff6b6b';
 ctx.lineWidth = 3;
 ctx.strokeRect(currentWeightX - 2, weightY - 2, weightSize + 4, weightSize + 4);
 
-// Draw all point clusters
-pointClusters.forEach((cluster, idx) => {
+// Draw all clusters
+clusters.forEach((cluster, idx) => {
 const isCurrentCluster = (idx === currentWeightIdx);
         
 cluster.points.forEach(point => {
 if(isCurrentCluster) {
 // Animate current cluster processing
-const progress = (frame % 80) / 80;
+const progress = (frame % 90) / 90;
 const alpha = 0.5 + 0.5 * Math.sin(progress * Math.PI * 4);
 const size = 2 + Math.sin(progress * Math.PI * 6) * 0.5;
                 
 ctx.globalAlpha = alpha;
-ctx.fillStyle = cluster.color;
+ctx.fillStyle = '#ff6b6b';
 ctx.beginPath();
 ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
 ctx.fill();
                 
 // Processing glow effect
 if(progress > 0.2) {
-ctx.strokeStyle = cluster.color;
+ctx.strokeStyle = '#ff6b6b';
 ctx.lineWidth = 2;
 ctx.globalAlpha = 0.3;
 ctx.beginPath();
@@ -962,7 +1037,7 @@ ctx.globalAlpha = 1;
 });
 
 // Draw connection line from weight to cluster
-const currentCluster = pointClusters[currentWeightIdx];
+const currentCluster = clusters[currentWeightIdx];
 if(currentCluster.points.length > 0) {
 const clusterCenterX = currentCluster.points.reduce((sum, p) => sum + p.x, 0) / currentCluster.points.length;
 const clusterCenterY = currentCluster.points.reduce((sum, p) => sum + p.y, 0) / currentCluster.points.length;
@@ -980,22 +1055,23 @@ ctx.stroke();
 ctx.setLineDash([]);
 }
 
-// Status text
+// Status text with position mapping info
 ctx.fillStyle = '#526d82';
 ctx.font = '12px Inter, sans-serif';
 ctx.textAlign = 'left';
-ctx.fillText(`Processing Weight ${currentWeightIdx + 1}/26`, 20, h - 40);
+ctx.fillText(`Processing Weight ${currentWeight.id}/26`, 20, h - 55);
+ctx.fillText(`3D Position: (${currentWeight.relativePos.x}, ${currentWeight.relativePos.y}, ${currentWeight.relativePos.z})`, 20, h - 40);
 ctx.fillText(`Cluster: ${currentCluster.points.length} points`, 20, h - 25);
 
 // Progress indicator
-const progressWidth = 150;
+const progressWidth = 120;
 const progressX = w - progressWidth - 20;
 const progressY = h - 35;
 
 ctx.fillStyle = '#e5e7eb';
 ctx.fillRect(progressX, progressY, progressWidth, 8);
 
-const progress = (currentWeightIdx + (frame % 80) / 80) / 26;
+const progress = (currentWeightIdx + (frame % 90) / 90) / 26;
 ctx.fillStyle = '#526d82';
 ctx.fillRect(progressX, progressY, progressWidth * progress, 8);
 
@@ -1039,7 +1115,7 @@ resDiv.style.display = 'none';
 singleDiv.style.display = 'block';
 };
 
-// ResNet-18 data
+// Performance charts data and setup
 const methods = ['KPConv','O-CNN','MinkowskiEng.','TorchSparse++','SPConv','fVDB','Ours (deg.)','Ours'];
 const fwd = [3316.6,199.3,78.3,83.7,62.8,49.6,60.4,51.5];
 const bwd = [6331.1,351.1,212.3,152.1,133.9,105.6,71.5,67.0];
@@ -1141,7 +1217,6 @@ borderWidth: 2.5,
 pointRadius: 4,
 pointHoverRadius: 6,
 fill: false,
-// 除了 Ours 方法外，其余都使用虚线
 borderDash: method.startsWith('Ours') ? [] : [5, 5]
 }))
 },
@@ -1169,7 +1244,7 @@ ticks: {color: '#1a1a1a'}
 });
 }
 
-// Single convolution data
+// Single convolution performance data
 const memInfData = {
 'KPConv': [10,10.5,11,11.5,12],
 'O-CNN': [6,6.4,6.8,7.1,7.5],
