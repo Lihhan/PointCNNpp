@@ -260,23 +260,12 @@ Lihan Li<sup>*</sup> · Haofeng Zhong<sup>*</sup> · Rui Bu · Mingchao Sun · W
 <div class="card">
 <h2>Abstract</h2>
 <p style="font-size:1.1rem;text-align:center;max-width:900px;margin:0 auto;line-height:1.7;">
-Existing convolutional learning methods for 3D point cloud
-data are divided into two paradigms: point-based methods
-that preserve geometric precision but often face performance
-challenges, and voxel-based methods that achieve high efficiency through quantization at the cost of geometric fidelity.
-This loss of precision is a critical bottleneck for tasks such
-as point cloud registration. We propose PointCNN++, a
-novel architectural design that fundamentally mitigates this
-precision-performance trade-off. It generalizes sparse convolution from voxels to points, treating voxel-based convolution as a specialized, degraded case of our more general
-point-based convolution. First, we introduce a point-centric
-convolution where the receptive field is centered on the original, high-precision point coordinates. Second, to make this
-high-fidelity operation performant, we design a computational strategy that operates natively on points. We formulate the convolution on native points as a Matrix-Vector Multiplication and Reduction (MVMR) problem, for which we
-develop a dedicated, highly-optimized GPU kernel. Experiments demonstrate that PointCNN++ uses an order of magnitude less memory and is several times faster than representative point-based methods. Furthermore, when used as
-a simple replacement for the voxel-based backbones it generalizes, it significantly improves point cloud registration
-accuracies while proving both more memory-efficient and
-faster. PointCNN++ shows that preserving geometric detail
-and achieving high performance are not mutually exclusive,
-paving the way for a new class of 3D learning with high fidelity and efficiency.
+3D point cloud convolutions are usually either point-based, keeping geometric detail but slow, or voxel-based, fast but losing precision.
+
+PointCNN++ bridges this gap by extending sparse convolution from voxels to points. It keeps each point’s true coordinates and runs efficiently through a custom GPU kernel based on Matrix–Vector Multiplication and Reduction (MVMR).
+
+It uses up to 10× less memory, runs several times faster, and improves registration accuracy over existing voxel and point methods — proving that high precision and high performance can coexist in 3D learning.
+
 <em>Our code will be open sourced.</em>
 </p>
 </div>
