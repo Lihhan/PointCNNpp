@@ -426,25 +426,21 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
 
 <!-- 整体方法描述 -->
 <div class="overview-intro">
-<p>The optimization method sorts and groups triplets by their k values, enabling triplets with the same k to share weight matrix W reads from global memory, thereby reducing memory access complexity from O(|T|) to O(|T|/L) where L is the average group length, significantly improving GPU memory efficiency and reducing computational overhead.
-
-</p>
+<p>PointCNN++ introduces a key optimization in convolution computation that fundamentally addresses the memory bottleneck in 3D point cloud processing:</p>
 </div>
 
-<!-- 三个主要组件 -->
 <div class="overview-components">
-
-<!-- 3D Convolution Kernel Structure -->
 <div class="component-card">
+<h3>Key Convolution Optimization: MVMR Method</h3>
 <div class="component-content">
-<div class="component-image">
-<img src="teaser.png" alt="Efficient GPU Algorithm of MVMR" style="max-width: 100%; height: auto;">
+<div class="component-image" style="text-align: center;">
+<img src="teaser.png" alt="MVMR Optimization Method" style="max-width: 80%; height: auto; transform: scale(1.2);">
 <p class="image-caption">Matrix-Vector Multiplication and Reduction (MVMR) method illustration</p>
 </div>
-
+<div class="component-description">
+<p>The optimization method sorts and groups triplets by their k values, enabling triplets with the same k to share weight matrix W reads from global memory, thereby reducing memory access complexity from O(|T|) to O(|T|/L) where L is the average group length, significantly improving GPU memory efficiency and reducing computational overhead.</p>
 </div>
 </div>
-
 </div>
 </div>
 </section>
