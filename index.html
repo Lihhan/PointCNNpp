@@ -67,20 +67,31 @@ color: var(--text);
 }
 
 .affiliations {
-font-size: 0.95rem;
-margin-top: 1rem;
-color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 1rem;
+    margin-bottom: 3rem; /* 增加底部间距 */
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.hero-buttons {
+    margin-top: 3rem; /* 增加按钮与作者信息的间距 */
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .btn {
-padding: 0.75rem 1.5rem;
-background: var(--accent);
-color: white;
-text-decoration: none;
-border-radius: 8px;
-font-weight: 500;
-transition: all 0.3s ease;
-border: 1px solid var(--accent);
+    padding: 0.75rem 1.5rem;
+    background: var(--accent);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid var(--accent);
+    display: inline-block; /* 确保按钮正常显示 */
 }
 
 .btn:hover {
