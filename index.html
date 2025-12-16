@@ -426,7 +426,9 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
 
 <!-- 整体方法描述 -->
 <div class="overview-intro">
-<p>PointCNN++ introduces a novel architectural design that fundamentally mitigates the precision-performance trade-off in 3D point cloud processing through three key innovations:</p>
+<p>The optimization method sorts and groups triplets by their k values, enabling triplets with the same k to share weight matrix W reads from global memory, thereby reducing memory access complexity from O(|T|) to O(|T|/L) where L is the average group length, significantly improving GPU memory efficiency and reducing computational overhead.
+
+</p>
 </div>
 
 <!-- 三个主要组件 -->
@@ -439,9 +441,7 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
 <img src="teaser.png" alt="Efficient GPU Algorithm of MVMR" style="max-width: 100%; height: auto;">
 <p class="image-caption">Matrix-Vector Multiplication and Reduction (MVMR) method illustration</p>
 </div>
-<div class="component-description">
-<p>We introduce a point-centric convolution where the receptive field is centered on the original, high-precision point coordinates, enabling efficient sparse convolution from voxels to points.</p>
-</div>
+
 </div>
 </div>
 
