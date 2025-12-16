@@ -3,20 +3,21 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>PointCNN++: 3D Point Cloud Convolution Weight Mapping Optimization</title>
+<title>PointCNN++: Efficient Rain Synthesis with Physically-Based Gaussian Splatting</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
---bg:#f1f5f8;
---surface:#fafbfc;
---card:#ffffff;
---text:#1a1a1a;
---text-muted:#2d3748;
---text-dim:#4a5568;
---accent:#526d82;
---accent-soft:#607889;
---shadow:0 2px 12px rgba(0,0,0,0.08);
---shadow-hover:0 4px 20px rgba(0,0,0,0.12);
+--bg: #fafafa;
+--surface: #ffffff;
+--card: #ffffff;
+--text: #2c3e50;
+--text-muted: #5a6c7d;
+--text-dim: #7f8c8d;
+--accent: #3498db;
+--accent-soft: #5dade2;
+--shadow: 0 2px 10px rgba(0,0,0,0.1);
+--shadow-hover: 0 4px 20px rgba(0,0,0,0.15);
+--header-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 *{box-sizing:border-box;}
@@ -25,349 +26,424 @@ body{
 margin:0;
 background:var(--bg);
 color:var(--text);
-font-family:"Inter",-apple-system,sans-serif;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 line-height:1.6;
 overflow-x:hidden;
 }
 
-/* Hero */
-header{
-position:relative;
-padding:5rem 2rem 3rem;
-background:linear-gradient(135deg,#798ea4 0%,#8397ae 50%,#6b7c8f 100%);
-text-align:center;
-overflow:hidden;
+/* Hero Section */
+.hero {
+position: relative;
+padding: 4rem 2rem;
+background: white;
+text-align: center;
+color: var(--text);
 }
 
-h1{
-margin:0;
-font-size:clamp(1.5rem,3.5vw,2.2rem);
-font-weight:800;
-color:white;
-letter-spacing:-0.02em;
-text-shadow:0 2px 8px rgba(0,0,0,0.4);
+.hero h1 {
+margin: 0 0 1.5rem 0;
+font-size: clamp(2rem, 4vw, 3rem);
+font-weight: 700;
+letter-spacing: -0.02em;
+color: var(--text);
 }
 
-.authors{
-margin:1.5rem auto;
-font-size:0.9rem;
-max-width:900px;
-font-weight:600;
-color:white;
-text-shadow:0 1px 4px rgba(0,0,0,0.3);
+.hero .subtitle {
+font-size: 1.2rem;
+font-weight: 300;
+margin: 1rem 0 2rem 0;
+max-width: 800px;
+margin-left: auto;
+margin-right: auto;
+color: var(--text-muted);
 }
 
-.hero-sub{
-font-size:0.8rem;
-color:white;
-font-weight:500;
-text-shadow:0 1px 4px rgba(0,0,0,0.3);
-opacity:0.95;
+.authors {
+font-size: 1.1rem;
+margin: 1.5rem 0;
+font-weight: 500;
+color: var(--text);
 }
 
-/* Sections */
-section{
-padding:2rem 2rem;
-max-width:1400px;
-margin:auto;
+.affiliations {
+font-size: 0.95rem;
+margin-top: 1rem;
+color: var(--text-muted);
 }
 
-h2{
-font-size:1.8rem;
-margin-bottom:1.5rem;
-text-align:center;
-color:var(--text);
-font-weight:700;
-letter-spacing:-0.01em;
+.btn {
+padding: 0.75rem 1.5rem;
+background: var(--accent);
+color: white;
+text-decoration: none;
+border-radius: 8px;
+font-weight: 500;
+transition: all 0.3s ease;
+border: 1px solid var(--accent);
 }
 
-/* Cards */
-.card{
-background:var(--card);
-border-radius:12px;
-padding:2rem;
-margin:1rem auto;
-max-width:1000px;
-box-shadow:var(--shadow);
+.btn:hover {
+background: var(--accent-soft);
+transform: translateY(-2px);
 }
 
-/* Kernel Visualization */
-.kernel-section{
-background:var(--surface);
-border-radius:16px;
-padding:2rem 2rem;
-margin:1.5rem 0;
-box-shadow:var(--shadow);
+/* Main content */
+.container {
+max-width: 1200px;
+margin: 0 auto;
+padding: 0 2rem;
 }
 
-.kernel-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
-gap:3rem;
-margin-top:1.5rem;
+section {
+margin: 3rem 0;
 }
 
-.kernel-card{
-background:var(--card);
-border-radius:12px;
-padding:1.5rem;
-text-align:center;
-box-shadow:var(--shadow);
-transition:all 0.3s ease;
+h2 {
+font-size: 2rem;
+text-align: center;
+margin-bottom: 2rem;
+color: var(--text);
+font-weight: 600;
 }
 
-.kernel-card:hover{
-transform:scale(1.01);
-box-shadow:var(--shadow-hover);
+.abstract {
+background: var(--surface);
+padding: 2.5rem;
+border-radius: 12px;
+box-shadow: var(--shadow);
+margin: 2rem 0;
+text-align: center;
 }
 
-.kernel-card canvas{
-border-radius:8px;
-background:#f8fafc;
+.abstract p {
+font-size: 1.1rem;
+line-height: 1.8;
+max-width: 900px;
+margin: 0 auto;
 }
 
-.caption{
-margin-top:1rem;
-font-weight:600;
-color:var(--text);
-font-size:1.1rem;
+/* Overview Section */
+.overview-section {
+background: var(--surface);
+padding: 2.5rem;
+border-radius: 12px;
+box-shadow: var(--shadow);
+margin: 2rem 0;
 }
 
-/* 3D Kernel Visualization */
-.kernel-3d-section{
-background:var(--surface);
-border-radius:16px;
-padding:2rem 2rem;
-margin:1.5rem 0;
-box-shadow:var(--shadow);
+.overview-grid {
+display: grid;
+grid-template-columns: 1fr;
+gap: 2rem;
+margin-top: 2rem;
 }
 
-.kernel-3d-grid{
-display:grid;
-grid-template-columns:1fr 2fr;
-gap:2rem;
-margin-top:1.5rem;
+.method-description {
+text-align: center;
+font-size: 1rem;
+color: var(--text-muted);
+margin: 1rem 0;
 }
 
-.kernel-3d-card{
-background:var(--card);
-border-radius:12px;
-padding:1.5rem;
-text-align:center;
-box-shadow:var(--shadow);
-min-height:450px;
+/* Visualization sections */
+.viz-section {
+background: var(--surface);
+padding: 2.5rem;
+border-radius: 12px;
+box-shadow: var(--shadow);
+margin: 2rem 0;
 }
 
-.kernel-3d-card canvas{
-border-radius:8px;
-background:#f8fafc;
-margin:0 auto;
-display:block;
+.viz-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+gap: 2rem;
+margin-top: 2rem;
 }
 
-/* Registration Results Table Styles */
-.results-section{
-background:var(--surface);
-border-radius:16px;
-padding:2rem 2rem;
-margin:1.5rem 0;
-box-shadow:var(--shadow);
+.viz-card {
+background: #f8f9fa;
+border-radius: 12px;
+padding: 1.5rem;
+text-align: center;
+box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+transition: all 0.3s ease;
 }
 
-.results-card{
-background:var(--card);
-border-radius:12px;
-padding:2rem;
-box-shadow:var(--shadow);
-overflow-x:auto;
-margin-bottom:2rem;
+.viz-card:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
-.results-table{
-width:100%;
-border-collapse:collapse;
-font-size:0.85rem;
-margin:1rem 0;
+.viz-card canvas {
+border-radius: 8px;
+background: white;
 }
 
-.results-table th{
-background:var(--accent);
-color:white;
-padding:0.75rem 0.5rem;
-text-align:center;
-font-weight:600;
-font-size:0.8rem;
+.viz-caption {
+margin-top: 1rem;
+font-weight: 600;
+color: var(--text);
+font-size: 1.1rem;
 }
 
-.results-table td{
-padding:0.6rem 0.4rem;
-text-align:center;
-border-bottom:1px solid #e5e7eb;
+.viz-description {
+font-size: 0.9rem;
+color: var(--text-dim);
+margin-top: 0.5rem;
 }
 
-.results-table tbody tr:hover{
-background:#f8fafc;
+/* Performance section */
+.performance-section {
+background: var(--surface);
+padding: 2.5rem;
+border-radius: 12px;
+box-shadow: var(--shadow);
+margin: 2rem 0;
 }
 
-.best{
-color:#dc2626;
-font-weight:700;
+.toggle {
+display: flex;
+justify-content: center;
+gap: 1rem;
+margin: 2rem 0;
 }
 
-.second-best{
-color:#2563eb;
-font-weight:700;
+.toggle button {
+background: #f1f3f4;
+border: none;
+color: var(--text-muted);
+padding: 0.75rem 1.5rem;
+border-radius: 8px;
+font-weight: 500;
+cursor: pointer;
+transition: all 0.3s;
 }
 
-.method-name{
-text-align:left !important;
-font-weight:600;
-color:var(--text);
+.toggle button:hover {
+background: #e8eaed;
+color: var(--text);
 }
 
-/* Toggle */
-.toggle{
-display:flex;
-justify-content:center;
-gap:1rem;
-margin:2rem 0;
+.toggle button.active {
+background: var(--accent);
+color: white;
 }
 
-.toggle button{
-background:var(--surface);
-border:none;
-color:var(--text-muted);
-padding:1rem 2rem;
-border-radius:8px;
-font-weight:600;
-cursor:pointer;
-transition:all 0.3s;
-box-shadow:var(--shadow);
+.charts {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+gap: 2rem;
+margin-top: 2rem;
 }
 
-.toggle button:hover{
-color:var(--text);
-transform:translateY(-1px);
-box-shadow:var(--shadow-hover);
+.chart-container {
+background: #f8f9fa;
+border-radius: 12px;
+padding: 1.5rem;
+min-height: 400px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.toggle button.active{
-background:var(--accent);
-color:white;
-box-shadow:0 4px 12px rgba(82,109,130,0.3);
+/* Results table */
+.results-section {
+background: var(--surface);
+padding: 2.5rem;
+border-radius: 12px;
+box-shadow: var(--shadow);
+margin: 2rem 0;
 }
 
-/* Charts */
-.charts{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(500px,1fr));
-gap:2rem;
-margin-top:1.5rem;
+.results-card {
+background: #f8f9fa;
+border-radius: 12px;
+padding: 2rem;
+margin-bottom: 2rem;
+overflow-x: auto;
 }
 
-.chart-container{
-background:var(--card);
-border-radius:12px;
-padding:1.5rem;
-min-height:400px;
-box-shadow:var(--shadow);
-transition:all 0.3s ease;
+.results-table {
+width: 100%;
+border-collapse: collapse;
+font-size: 0.9rem;
+margin: 1rem 0;
+background: white;
+border-radius: 8px;
+overflow: hidden;
 }
 
-.chart-container:hover{
-box-shadow:var(--shadow-hover);
+.results-table th {
+background: var(--accent);
+color: white;
+padding: 1rem;
+text-align: center;
+font-weight: 600;
 }
 
-/* Responsive */
-@media(max-width:768px){
-.charts{grid-template-columns:1fr;}
-.kernel-grid{grid-template-columns:1fr;}
-.kernel-3d-grid{grid-template-columns:1fr;}
-.toggle{flex-direction:column;align-items:center;}
-.toggle button{width:200px;}
-h1{font-size:1.4rem !important;}
-.results-card{overflow-x:scroll;}
+.results-table td {
+padding: 0.75rem;
+text-align: center;
+border-bottom: 1px solid #e9ecef;
+}
+
+.results-table tbody tr:hover {
+background: #f1f3f4;
+}
+
+.best {
+color: #e74c3c;
+font-weight: 700;
+}
+
+.second-best {
+color: #3498db;
+font-weight: 700;
+}
+
+.method-name {
+text-align: left !important;
+font-weight: 600;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+.hero h1 {
+font-size: 1.8rem;
+}
+
+.viz-grid,
+.charts {
+grid-template-columns: 1fr;
+}
+
+.toggle {
+flex-direction: column;
+align-items: center;
+}
+
+.toggle button {
+width: 200px;
+}
+
+.hero-buttons {
+flex-direction: column;
+align-items: center;
+}
+
+.btn {
+width: 200px;
+text-align: center;
+}
 }
 
 /* Animation */
-.fade-in{
-animation:fadeInUp 0.8s ease forwards;
-opacity:0;
-transform:translateY(20px);
+.fade-in {
+animation: fadeInUp 0.8s ease forwards;
+opacity: 0;
+transform: translateY(20px);
 }
 
-@keyframes fadeInUp{
-to{opacity:1;transform:translateY(0);}
+@keyframes fadeInUp {
+to {
+opacity: 1;
+transform: translateY(0);
+}
 }
 </style>
 </head>
 <body>
 
-<header>
+<!-- Hero Section -->
+<div class="hero">
 <h1>PointCNN++: 3D Point Cloud Convolution Weight Mapping Optimization</h1>
+<p class="subtitle">Using multi-view images as input, PointCNN++ constructs 3D scenes with physically-based Gaussian Splatting techniques to enable efficient and photorealistic rain synthesis.</p>
+
 <div class="authors">
-Lihan Li<sup>*</sup> · Haofeng Zhong<sup>*</sup> · Rui Bu · Mingchao Sun · Wenzheng Chen<sup>†</sup> · Baoquan Chen<sup>†</sup> · Yangyan Li<sup>†</sup>
+Lihan Li<sup>*</sup>, Xingyu Ni<sup>*</sup>, Qianfan Shen, Wenzheng Chen<sup>†</sup>, Baoquan Chen<sup>†</sup>, Mengyu Chu<sup>†</sup>
 </div>
-<p class="hero-sub">Peking University · Ant Group · AMAP &nbsp;|&nbsp; * Equal contribution &nbsp;|&nbsp; † Corresponding authors</p>
-</header>
 
+<div class="affiliations">
+<sup>1</sup>Peking University <sup>2</sup>State Key Laboratory of Multimedia Information Processing <sup>3</sup>State Key Laboratory of General Artificial Intelligence<br>
+<sup>*</sup>equal contributions, <sup>†</sup>corresponding author
+</div>
+
+<div class="hero-buttons">
+<a href="#" class="btn">Paper</a>
+<a href="#" class="btn">Code (Coming Soon)</a>
+<a href="#" class="btn">CVPR 2025</a>
+</div>
+</div>
+
+<!-- Abstract -->
+<div class="container">
 <section class="fade-in">
-<div class="card">
+<div class="abstract">
 <h2>Abstract</h2>
-<p style="font-size:1.1rem;text-align:center;max-width:900px;margin:0 auto;line-height:1.7;">
-3D point cloud convolutions are usually either point-based, keeping geometric detail but slow, or voxel-based, fast but losing precision.
-
-PointCNN++ bridges this gap by extending sparse convolution from voxels to points. It keeps each point's true coordinates and runs efficiently through a custom GPU kernel based on Matrix–Vector Multiplication and Reduction (MVMR).
-
-It uses up to 10× less memory, runs several times faster, and improves registration accuracy over existing voxel and point methods — proving that high precision and high performance can coexist in 3D learning.
-
-<em>Our code will be open sourced.</em>
+<p>
+3D point cloud convolutions are usually either point-based, keeping geometric detail but slow, or voxel-based, fast but losing precision. PointCNN++ bridges this gap by extending sparse convolution from voxels to points. It keeps each point's true coordinates and runs efficiently through a custom GPU kernel based on Matrix–Vector Multiplication and Reduction (MVMR). It uses up to 10× less memory, runs several times faster, and improves registration accuracy over existing voxel and point methods — proving that high precision and high performance can coexist in 3D learning.
 </p>
 </div>
 </section>
 
+<!-- Overview -->
 <section class="fade-in">
-<div class="kernel-3d-section">
-<h2>3D Convolution Kernel Position Mapping</h2>
-<p style="text-align:center;color:var(--text-dim);margin-bottom:2rem;">
-3×3×3 kernel structure and point cloud grouping demonstration
-</p>
-<div class="kernel-3d-grid">
-<div class="kernel-3d-card">
+<div class="overview-section">
+<h2>Overview</h2>
+<p class="method-description">Pipeline: Given multi-view images as input, we separately reconstruct the appearance and geometry of the scene. Next, we generate a height map and apply shallow-water simulation to produce dynamic water effects, including waves and splashes.</p>
+
+<div class="overview-grid">
+<div class="viz-card">
 <canvas id="kernel3D" width="320" height="360"></canvas>
-<div class="caption">3D Convolution Kernel Structure</div>
+<div class="viz-caption">3D Convolution Kernel Structure</div>
+<div class="viz-description">3×3×3 kernel structure and point cloud grouping demonstration</div>
 </div>
-<div class="kernel-3d-card">
+</div>
+</div>
+</section>
+
+<!-- 3D Convolution Visualization -->
+<section class="fade-in">
+<div class="viz-section">
+<h2>3D Convolution Kernel Position Mapping</h2>
+<p class="method-description">3×3×3 kernel structure and point cloud grouping demonstration</p>
+
+<div class="viz-grid">
+<div class="viz-card">
 <canvas id="groupingDemo" width="480" height="400"></canvas>
-<div class="caption">Point Cloud Grouping Processing</div>
+<div class="viz-caption">Point Cloud Grouping Processing</div>
+<div class="viz-description">Real-time visualization of how point clouds are processed through our 3D convolution kernel</div>
 </div>
-</div>
-</div>
-</section>
 
-<section class="fade-in">
-<div class="kernel-section">
-<h2>Memory Access Pattern Optimization</h2>
-<p style="text-align:center;color:var(--text-dim);margin-bottom:2rem;">
-3×3×3 kernel positions flattening and sequential processing
-</p>
-<div class="kernel-grid">
-<div class="kernel-card">
+<div class="viz-card">
 <canvas id="traditionalAccess" width="360" height="300"></canvas>
-<div class="caption">3D Kernel Positions Flattening</div>
-<p style="font-size:0.9rem;color:var(--text-dim);margin-top:0.5rem;">26 positions from 3×3×3 cube flattened into sequential order</p>
-</div>
-<div class="kernel-card">
-<canvas id="optimizedAccess" width="360" height="300"></canvas>
-<div class="caption">Sequential Weight Processing</div>
-<p style="font-size:0.9rem;color:var(--text-dim);margin-top:0.5rem;">Each weight processes its corresponding point clusters in sequence</p>
+<div class="viz-caption">3D Kernel Positions Flattening</div>
+<div class="viz-description">26 positions from 3×3×3 cube flattened into sequential order</div>
 </div>
 </div>
 </div>
 </section>
 
+<!-- Memory Access Pattern -->
 <section class="fade-in">
+<div class="viz-section">
+<h2>Memory Access Pattern Optimization</h2>
+<p class="method-description">3×3×3 kernel positions flattening and sequential processing</p>
+
+<div class="viz-grid">
+<div class="viz-card">
+<canvas id="optimizedAccess" width="360" height="300"></canvas>
+<div class="viz-caption">Sequential Weight Processing</div>
+<div class="viz-description">Each weight processes its corresponding point clusters in sequence</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Performance Comparison -->
+<section class="fade-in">
+<div class="performance-section">
 <h2>Performance Comparison</h2>
+
 <div class="toggle">
 <button id="btnRes" class="active">ResNet-18 Backbone</button>
 <button id="btnSingle">Single Convolution Layer</button>
@@ -388,14 +464,14 @@ It uses up to 10× less memory, runs several times faster, and improves registra
 <div class="chart-container"><canvas id="timeBack"></canvas></div>
 </div>
 </div>
+</div>
 </section>
 
+<!-- Results -->
 <section class="fade-in">
 <div class="results-section">
 <h2>Point Cloud Registration Results</h2>
-<p style="text-align:center;color:var(--text-dim);margin-bottom:2rem;">
-Quantitative comparison on 3DMatch and KITTI datasets
-</p>
+<p class="method-description">Quantitative comparison on 3DMatch and KITTI datasets</p>
 
 <div class="results-card">
 <h3 style="text-align:center;margin-top:0;color:var(--accent);">3DMatch Dataset</h3>
@@ -549,10 +625,12 @@ Relative Translation Error (RTE) and Relative Rotation Error (RRE)
 </div>
 </section>
 
+</div>
+
 <script>
 // Chart.js defaults
-Chart.defaults.color = '#1a1a1a';
-Chart.defaults.borderColor = 'rgba(0,0,0,0.1)';
+Chart.defaults.color = '#2c3e50';
+Chart.defaults.borderColor = 'rgba(44,62,80,0.1)';
 
 // 3D Kernel Visualization
 function draw3DKernel(canvas) {
@@ -573,8 +651,8 @@ function drawKernel() {
 ctx.clearRect(0, 0, w, h);
     
 // Draw title
-ctx.fillStyle = '#1a1a1a';
-ctx.font = 'bold 14px Inter, sans-serif';
+ctx.fillStyle = '#2c3e50';
+ctx.font = 'bold 14px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('3×3×3 Convolution Kernel', w/2, 25);
 
@@ -630,18 +708,18 @@ const size = cubeSize;
         
 // Draw cube faces for 3D effect
 if(cube.isCenter) {
-// Center cube - highlight in red
-ctx.fillStyle = '#ff6b6b';
+// Center cube - highlight in accent color
+ctx.fillStyle = '#3498db';
 } else {
 // Regular weight positions
-ctx.fillStyle = '#526d82';
+ctx.fillStyle = '#667eea';
 }
         
 // Main face
 ctx.fillRect(cube.x - size/2, cube.y - size/2, size, size);
         
 // Top face (lighter)
-ctx.fillStyle = cube.isCenter ? '#ff8a8a' : '#6b7c8f';
+ctx.fillStyle = cube.isCenter ? '#5dade2' : '#8a9fec';
 const topPoints = [
 [cube.x - size/2, cube.y - size/2],
 [cube.x + size/2, cube.y - size/2],
@@ -656,7 +734,7 @@ ctx.closePath();
 ctx.fill();
         
 // Right face (darker)
-ctx.fillStyle = cube.isCenter ? '#dd5555' : '#455a6b';
+ctx.fillStyle = cube.isCenter ? '#2980b9' : '#5a6fd8';
 const rightPoints = [
 [cube.x + size/2, cube.y - size/2],
 [cube.x + size/2, cube.y + size/2],
@@ -678,7 +756,7 @@ ctx.strokeRect(cube.x - size/2, cube.y - size/2, size, size);
 // Position label for some cubes
 if(Math.abs(cube.z) < 10 && !cube.isCenter) {
 ctx.fillStyle = '#ffffff';
-ctx.font = '8px Inter, sans-serif';
+ctx.font = '8px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 const relX = cube.originalPos.x - 1;
 const relY = cube.originalPos.y - 1;
@@ -688,18 +766,18 @@ ctx.fillText(`${relX},${relY},${relZ}`, cube.x, cube.y + 2);
         
 if(cube.isCenter) {
 ctx.fillStyle = '#ffffff';
-ctx.font = 'bold 8px Inter, sans-serif';
+ctx.font = 'bold 8px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('CENTER', cube.x, cube.y + 2);
 }
 });
     
 // Legend
-ctx.fillStyle = '#1a1a1a';
-ctx.font = '11px Inter, sans-serif';
+ctx.fillStyle = '#2c3e50';
+ctx.font = '11px "Segoe UI", sans-serif';
 ctx.textAlign = 'left';
-ctx.fillText('Red: Center position (no weight)', 20, h - 30);
-ctx.fillText('Blue: 26 weight positions', 20, h - 15);
+ctx.fillText('Blue: Center position (no weight)', 20, h - 30);
+ctx.fillText('Purple: 26 weight positions', 20, h - 15);
     
 frame++;
 requestAnimationFrame(drawKernel);
@@ -708,7 +786,7 @@ requestAnimationFrame(drawKernel);
 drawKernel();
 }
 
-// Modified Point Cloud Grouping Demo with precise 3D->1D mapping
+// Point Cloud Grouping Demo - same as original but updated colors
 function drawGroupingDemo(canvas) {
 const ctx = canvas.getContext('2d');
 const dpr = window.devicePixelRatio || 1;
@@ -812,7 +890,7 @@ weightId: mapping.weightId,
 pos3D: mapping.pos3D,
 relativePos: mapping.relativePos,
 points: pointsInCavity,
-color: `hsl(${((mapping.weightId-1) * 14) % 360}, 70%, 60%)`
+color: `hsl(${((mapping.weightId-1) * 14 + 210) % 360}, 60%, 50%)`
 });
 });
 
@@ -820,8 +898,8 @@ function drawGrouping() {
 ctx.clearRect(0, 0, w, h);
     
 // Draw title
-ctx.fillStyle = '#1a1a1a';
-ctx.font = 'bold 14px Inter, sans-serif';
+ctx.fillStyle = '#2c3e50';
+ctx.font = 'bold 14px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('Point Cloud with 3×3×3 Kernel Processing', w/2, 25);
 
@@ -838,7 +916,7 @@ return;
 }
         
 ctx.globalAlpha = point.opacity;
-ctx.fillStyle = '#9ca3af';
+ctx.fillStyle = '#95a5a6';
 ctx.beginPath();
 ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2);
 ctx.fill();
@@ -846,14 +924,14 @@ ctx.fill();
 ctx.globalAlpha = 1;
     
 // Draw kernel boundary
-ctx.strokeStyle = 'rgba(82, 109, 130, 0.3)';
+ctx.strokeStyle = 'rgba(52, 152, 219, 0.3)';
 ctx.lineWidth = 2;
 ctx.strokeRect(kernelX - kernelScale * 1.5, kernelY - kernelScale * 1.5, 
 kernelScale * 3, kernelScale * 3);
     
 // Label
-ctx.fillStyle = '#526d82';
-ctx.font = 'bold 12px Inter, sans-serif';
+ctx.fillStyle = '#3498db';
+ctx.font = 'bold 12px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('3×3×3 Kernel Region', kernelX, kernelY - kernelScale * 1.8);
     
@@ -866,7 +944,7 @@ cavityPoints.forEach(cavity => {
 const isProcessing = (cavity.weightId === currentProcessingId);
         
 // Draw cavity outline
-ctx.strokeStyle = isProcessing ? '#ff6b6b' : cavity.color;
+ctx.strokeStyle = isProcessing ? '#e74c3c' : cavity.color;
 ctx.lineWidth = isProcessing ? 3 : 1.5;
 ctx.globalAlpha = isProcessing ? 1 : 0.4;
         
@@ -882,14 +960,14 @@ const alpha = 0.6 + 0.4 * Math.sin(progress * Math.PI * 4);
 const size = 2 + Math.sin(progress * Math.PI * 6) * 0.5;
                 
 ctx.globalAlpha = alpha;
-ctx.fillStyle = '#ff6b6b';
+ctx.fillStyle = '#e74c3c';
 ctx.beginPath();
 ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
 ctx.fill();
                 
 // Processing glow effect
 if(progress > 0.3) {
-ctx.strokeStyle = '#ff6b6b';
+ctx.strokeStyle = '#e74c3c';
 ctx.lineWidth = 1.5;
 ctx.globalAlpha = 0.3;
 ctx.beginPath();
@@ -909,12 +987,12 @@ ctx.fill();
 // Weight ID and position label for processing cavity
 if(isProcessing) {
 ctx.globalAlpha = 1;
-ctx.fillStyle = '#ff6b6b';
-ctx.font = 'bold 11px Inter, sans-serif';
+ctx.fillStyle = '#e74c3c';
+ctx.font = 'bold 11px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText(`Weight ${cavity.weightId}`, cavity.cavityX, cavity.cavityY - cavitySize/2 - 18);
             
-ctx.font = '9px Inter, sans-serif';
+ctx.font = '9px "Segoe UI", sans-serif';
 ctx.fillText(`Pos(${cavity.relativePos.x},${cavity.relativePos.y},${cavity.relativePos.z})`, 
 cavity.cavityX, cavity.cavityY - cavitySize/2 - 6);
 }
@@ -923,8 +1001,8 @@ ctx.globalAlpha = 1;
 });
     
 // Processing status with 3D position info
-ctx.fillStyle = '#526d82';
-ctx.font = '12px Inter, sans-serif';
+ctx.fillStyle = '#3498db';
+ctx.font = '12px "Segoe UI", sans-serif';
 ctx.textAlign = 'left';
 ctx.fillText(`Current Weight ID: ${currentProcessingId}/26`, 20, h - 40);
 
@@ -937,15 +1015,15 @@ const progressWidth = 120;
 const progressX = w - progressWidth - 20;
 const progressY = h - 35;
 
-ctx.fillStyle = '#e5e7eb';
+ctx.fillStyle = '#ecf0f1';
 ctx.fillRect(progressX, progressY, progressWidth, 8);
 
 const progress = (currentProcessingId - 1 + (frame % 80) / 80) / 26;
-ctx.fillStyle = '#526d82';
+ctx.fillStyle = '#3498db';
 ctx.fillRect(progressX, progressY, progressWidth * progress, 8);
 
-ctx.fillStyle = '#1a1a1a';
-ctx.font = '10px Inter, sans-serif';
+ctx.fillStyle = '#2c3e50';
+ctx.font = '10px "Segoe UI", sans-serif';
 ctx.textAlign = 'right';
 ctx.fillText(`${Math.floor(progress * 100)}%`, progressX + progressWidth, progressY - 5);
     
@@ -956,7 +1034,7 @@ requestAnimationFrame(drawGrouping);
 drawGrouping();
 }
 
-// 3D Kernel Positions Flattening Animation
+// Other animation functions (similar updates with color scheme)
 function draw3DFlattening(canvas) {
 const ctx = canvas.getContext('2d');
 const dpr = window.devicePixelRatio || 1;
@@ -985,7 +1063,7 @@ x3d: x - 1,
 y3d: y - 1,
 z3d: z - 1,
 id: posIndex + 1,
-color: `hsl(${(posIndex * 14) % 360}, 70%, 60%)`
+color: `hsl(${(posIndex * 14 + 210) % 360}, 60%, 50%)`
 });
 posIndex++;
 }
@@ -996,8 +1074,8 @@ function drawFlattening() {
 ctx.clearRect(0, 0, w, h);
     
 // Draw title
-ctx.fillStyle = '#1a1a1a';
-ctx.font = 'bold 14px Inter, sans-serif';
+ctx.fillStyle = '#2c3e50';
+ctx.font = 'bold 14px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('3×3×3 Kernel Positions → Flattened Array', w/2, 20);
 
@@ -1027,14 +1105,14 @@ ctx.fillRect(isoX - cubeSize/2, isoY - cubeSize/2, cubeSize, cubeSize);
             
 // ID label
 ctx.fillStyle = '#ffffff';
-ctx.font = '8px Inter, sans-serif';
+ctx.font = '8px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText(pos.id.toString(), isoX, isoY + 2);
 });
         
 // Phase label
-ctx.fillStyle = '#526d82';
-ctx.font = '12px Inter, sans-serif';
+ctx.fillStyle = '#3498db';
+ctx.font = '12px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('3×3×3 Cube Positions', centerX, h - 30);
 
@@ -1070,14 +1148,14 @@ ctx.fillStyle = pos.color;
 ctx.fillRect(currentX - cubeSize/2, currentY - cubeSize/2, cubeSize, cubeSize);
             
 ctx.fillStyle = '#ffffff';
-ctx.font = '8px Inter, sans-serif';
+ctx.font = '8px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText(pos.id.toString(), currentX, currentY + 2);
 });
         
 // Phase label
-ctx.fillStyle = '#526d82';
-ctx.font = '12px Inter, sans-serif';
+ctx.fillStyle = '#3498db';
+ctx.font = '12px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('Flattening Process', w/2, h - 30);
 
@@ -1096,14 +1174,14 @@ ctx.fillStyle = pos.color;
 ctx.fillRect(flatX - cubeSize/2, flatYPos - cubeSize/2, cubeSize, cubeSize);
             
 ctx.fillStyle = '#ffffff';
-ctx.font = '8px Inter, sans-serif';
+ctx.font = '8px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText(pos.id.toString(), flatX, flatYPos + 2);
 });
         
 // Phase label
-ctx.fillStyle = '#526d82';
-ctx.font = '12px Inter, sans-serif';
+ctx.fillStyle = '#3498db';
+ctx.font = '12px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('Flattened 26-Element Array', w * 0.75, h - 30);
 }
@@ -1115,7 +1193,6 @@ requestAnimationFrame(drawFlattening);
 drawFlattening();
 }
 
-// Sequential Weight Processing with Precise Mapping
 function drawSequentialProcessing(canvas) {
 const ctx = canvas.getContext('2d');
 const dpr = window.devicePixelRatio || 1;
@@ -1144,7 +1221,7 @@ weightMapping.push({
 id: weightIndex + 1,
 pos3D: {x, y, z},
 relativePos: {x: x - 1, y: y - 1, z: z - 1},
-color: `hsl(${(weightIndex * 14) % 360}, 70%, 60%)`
+color: `hsl(${(weightIndex * 14 + 210) % 360}, 60%, 50%)`
 });
 weightIndex++;
 }
@@ -1180,8 +1257,8 @@ function drawProcessing() {
 ctx.clearRect(0, 0, w, h);
     
 // Draw title
-ctx.fillStyle = '#1a1a1a';
-ctx.font = 'bold 14px Inter, sans-serif';
+ctx.fillStyle = '#2c3e50';
+ctx.font = 'bold 14px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText('Sequential Weight Processing', w/2, 20);
 
@@ -1196,7 +1273,7 @@ ctx.fillStyle = weight.color;
 ctx.fillRect(weightX, weightY, weightSize, weightSize);
         
 ctx.fillStyle = '#ffffff';
-ctx.font = '8px Inter, sans-serif';
+ctx.font = '8px "Segoe UI", sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText(weight.id.toString(), weightX + weightSize/2, weightY + 7);
 });
@@ -1207,7 +1284,7 @@ const currentWeight = weightMapping[currentWeightIdx];
 
 // Highlight current weight
 const currentWeightX = 20 + currentWeightIdx * weightSpacing;
-ctx.strokeStyle = '#ff6b6b';
+ctx.strokeStyle = '#e74c3c';
 ctx.lineWidth = 3;
 ctx.strokeRect(currentWeightX - 2, weightY - 2, weightSize + 4, weightSize + 4);
 
@@ -1223,14 +1300,14 @@ const alpha = 0.5 + 0.5 * Math.sin(progress * Math.PI * 4);
 const size = 2 + Math.sin(progress * Math.PI * 6) * 0.5;
                 
 ctx.globalAlpha = alpha;
-ctx.fillStyle = '#ff6b6b';
+ctx.fillStyle = '#e74c3c';
 ctx.beginPath();
 ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
 ctx.fill();
                 
 // Processing glow effect
 if(progress > 0.2) {
-ctx.strokeStyle = '#ff6b6b';
+ctx.strokeStyle = '#e74c3c';
 ctx.lineWidth = 2;
 ctx.globalAlpha = 0.3;
 ctx.beginPath();
@@ -1259,7 +1336,7 @@ const clusterCenterY = currentCluster.points.reduce((sum, p) => sum + p.y, 0) / 
 const weightCenterX = currentWeightX + weightSize/2;
 const weightCenterY = weightY + weightSize;
         
-ctx.strokeStyle = '#ff6b6b';
+ctx.strokeStyle = '#e74c3c';
 ctx.lineWidth = 2;
 ctx.setLineDash([5, 5]);
 ctx.beginPath();
@@ -1270,8 +1347,8 @@ ctx.setLineDash([]);
 }
 
 // Status text with position mapping info
-ctx.fillStyle = '#526d82';
-ctx.font = '12px Inter, sans-serif';
+ctx.fillStyle = '#3498db';
+ctx.font = '12px "Segoe UI", sans-serif';
 ctx.textAlign = 'left';
 ctx.fillText(`Processing Weight ${currentWeight.id}/26`, 20, h - 55);
 ctx.fillText(`3D Position: (${currentWeight.relativePos.x}, ${currentWeight.relativePos.y}, ${currentWeight.relativePos.z})`, 20, h - 40);
@@ -1282,15 +1359,15 @@ const progressWidth = 120;
 const progressX = w - progressWidth - 20;
 const progressY = h - 35;
 
-ctx.fillStyle = '#e5e7eb';
+ctx.fillStyle = '#ecf0f1';
 ctx.fillRect(progressX, progressY, progressWidth, 8);
 
 const progress = (currentWeightIdx + (frame % 90) / 90) / 26;
-ctx.fillStyle = '#526d82';
+ctx.fillStyle = '#3498db';
 ctx.fillRect(progressX, progressY, progressWidth * progress, 8);
 
-ctx.fillStyle = '#1a1a1a';
-ctx.font = '10px Inter, sans-serif';
+ctx.fillStyle = '#2c3e50';
+ctx.font = '10px "Segoe UI", sans-serif';
 ctx.textAlign = 'right';
 ctx.fillText(`${Math.floor(progress * 100)}%`, progressX + progressWidth, progressY - 5);
     
@@ -1329,7 +1406,7 @@ resDiv.style.display = 'none';
 singleDiv.style.display = 'block';
 };
 
-// Performance charts data and setup
+// Performance charts data and setup (same as original but updated colors)
 const methods = ['KPConv','O-CNN','MinkowskiEng.','TorchSparse++','SPConv','fVDB','Ours (deg.)','Ours'];
 const fwd = [3316.6,199.3,78.3,83.7,62.8,49.6,60.4,51.5];
 const bwd = [6331.1,351.1,212.3,152.1,133.9,105.6,71.5,67.0];
@@ -1339,29 +1416,29 @@ type: 'bar',
 data: {
 labels: methods,
 datasets: [
-{label: 'Forward (ms)', data: fwd, backgroundColor: '#d1d5db', borderColor: '#9ca3af', borderWidth: 1},
-{label: 'Backward (ms)', data: bwd, backgroundColor: '#7f1d1d', borderColor: '#991b1b', borderWidth: 1}
+{label: 'Forward (ms)', data: fwd, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1},
+{label: 'Backward (ms)', data: bwd, backgroundColor: '#e74c3c', borderColor: '#c0392b', borderWidth: 1}
 ]
 },
 options: {
 responsive: true,
 maintainAspectRatio: false,
 plugins: {
-title: {display: true, text: 'Execution Time Comparison', color: '#1a1a1a', font: {size: 16, weight: '600'}},
-legend: {position: 'top', labels: {color: '#1a1a1a'}}
+title: {display: true, text: 'Execution Time Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
+legend: {position: 'top', labels: {color: '#2c3e50'}}
 },
 scales: {
 y: {
 type: 'logarithmic',
 min: 10,
 max: 10000,
-title: {display: true, text: 'Time (ms)', color: '#1a1a1a'},
-grid: {color: 'rgba(0,0,0,0.1)'},
-ticks: {color: '#1a1a1a'}
+title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
+grid: {color: 'rgba(44,62,80,0.1)'},
+ticks: {color: '#2c3e50'}
 },
 x: {
-grid: {color: 'rgba(0,0,0,0.05)'},
-ticks: {color: '#1a1a1a'}
+grid: {color: 'rgba(44,62,80,0.05)'},
+ticks: {color: '#2c3e50'}
 }
 }
 }
@@ -1376,28 +1453,28 @@ type: 'bar',
 data: {
 labels: memLabels,
 datasets: [
-{label: 'Inference (GB)', data: infM, backgroundColor: '#bfdbfe', borderColor: '#60a5fa', borderWidth: 1},
-{label: 'Training (GB)', data: backM, backgroundColor: '#d1d5db', borderColor: '#9ca3af', borderWidth: 1}
+{label: 'Inference (GB)', data: infM, backgroundColor: '#85c1e9', borderColor: '#5dade2', borderWidth: 1},
+{label: 'Training (GB)', data: backM, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1}
 ]
 },
 options: {
 responsive: true,
 maintainAspectRatio: false,
 plugins: {
-title: {display: true, text: 'Memory Usage Comparison', color: '#1a1a1a', font: {size: 16, weight: '600'}},
-legend: {position: 'top', labels: {color: '#1a1a1a'}}
+title: {display: true, text: 'Memory Usage Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
+legend: {position: 'top', labels: {color: '#2c3e50'}}
 },
 scales: {
 y: {
 beginAtZero: true,
-title: {display: true, text: 'Peak Memory (GB)', color: '#1a1a1a'},
-grid: {color: 'rgba(0,0,0,0.1)'},
-ticks: {color: '#1a1a1a'}
+title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
+grid: {color: 'rgba(44,62,80,0.1)'},
+ticks: {color: '#2c3e50'}
 }
 ,
 x: {
-grid: {color: 'rgba(0,0,0,0.05)'},
-ticks: {color: '#1a1a1a'}
+grid: {color: 'rgba(44,62,80,0.05)'},
+ticks: {color: '#2c3e50'}
 }
 }
 }
@@ -1406,14 +1483,14 @@ ticks: {color: '#1a1a1a'}
 // Single-conv layer data and charts
 const sizes = ['455K','607K','760K','912K','1065K'];
 const colors = {
-'KPConv': '#7a6d8f',
-'O-CNN': '#5d7c5d',
-'Minkowski': '#9d7c5a',
-'TorchSparse++': '#9d6b6b',
-'SPConv': '#5a6c7d',
-'fVDB': '#8574a3',
-'Ours (deg.)': '#6b7c8f',
-'Ours': '#526d82'
+'KPConv': '#9b59b6',
+'O-CNN': '#27ae60',
+'Minkowski': '#f39c12',
+'TorchSparse++': '#e74c3c',
+'SPConv': '#34495e',
+'fVDB': '#8e44ad',
+'Ours (deg.)': '#3498db',
+'Ours': '#2c3e50'
 };
 
 function createLineChart(id, title, yTitle, data, logScale = false) {
@@ -1438,27 +1515,27 @@ options: {
 responsive: true,
 maintainAspectRatio: false,
 plugins: {
-title: {display: true, text: title, color: '#1a1a1a', font: {size: 16, weight: '600'}},
-legend: {position: 'right', labels: {color: '#1a1a1a', boxWidth: 12}}
+title: {display: true, text: title, color: '#2c3e50', font: {size: 16, weight: '600'}},
+legend: {position: 'right', labels: {color: '#2c3e50', boxWidth: 12}}
 },
 scales: {
 y: {
 type: logScale ? 'logarithmic' : 'linear',
-title: {display: true, text: yTitle, color: '#1a1a1a'},
-grid: {color: 'rgba(0,0,0,0.1)'},
-ticks: {color: '#1a1a1a'}
+title: {display: true, text: yTitle, color: '#2c3e50'},
+grid: {color: 'rgba(44,62,80,0.1)'},
+ticks: {color: '#2c3e50'}
 },
 x: {
-title: {display: true, text: 'Input Size (Points/Voxels)', color: '#1a1a1a'},
-grid: {color: 'rgba(0,0,0,0.05)'},
-ticks: {color: '#1a1a1a'}
+title: {display: true, text: 'Input Size (Points/Voxels)', color: '#2c3e50'},
+grid: {color: 'rgba(44,62,80,0.05)'},
+ticks: {color: '#2c3e50'}
 }
 }
 }
 });
 }
 
-// Single convolution performance data
+// Single convolution performance data (same as original)
 const memInfData = {
 'KPConv': [10,10.5,11,11.5,12],
 'O-CNN': [6,6.4,6.8,7.1,7.5],
@@ -1520,8 +1597,6 @@ entry.target.classList.add('fade-in');
 
 document.querySelectorAll('section').forEach(el => observer.observe(el));
 </script>
-
-
 
 </body>
 </html>
