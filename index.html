@@ -34,11 +34,11 @@ overflow-x:hidden;
 /* Hero Section */
 .hero {
 position: relative;
-padding: 6rem 2rem 4rem 2rem; /* 增加顶部padding */
+padding: 6rem 2rem 4rem 2rem;
 background: white;
 text-align: center;
 color: var(--text);
-margin-top: 2rem; /* 添加顶部margin */
+margin-top: 2rem;
 }
 
 .hero h1 {
@@ -66,32 +66,37 @@ font-weight: 500;
 color: var(--text);
 }
 
+.authors sup, .affiliations sup {
+font-size: 0.75em;
+vertical-align: super;
+}
+
 .affiliations {
-    font-size: 0.95rem;
-    margin-top: 1rem;
-    margin-bottom: 3rem; /* 增加底部间距 */
-    color: var(--text-muted);
-    line-height: 1.4;
+font-size: 0.95rem;
+margin-top: 1rem;
+margin-bottom: 3rem;
+color: var(--text-muted);
+line-height: 1.4;
 }
 
 .hero-buttons {
-    margin-top: 3rem; /* 增加按钮与作者信息的间距 */
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
+margin-top: 3rem;
+display: flex;
+justify-content: center;
+gap: 1rem;
+flex-wrap: wrap;
 }
 
 .btn {
-    padding: 0.75rem 1.5rem;
-    background: var(--accent);
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border: 1px solid var(--accent);
-    display: inline-block; /* 确保按钮正常显示 */
+padding: 0.75rem 1.5rem;
+background: var(--accent);
+color: white;
+text-decoration: none;
+border-radius: 8px;
+font-weight: 500;
+transition: all 0.3s ease;
+border: 1px solid var(--accent);
+display: inline-block;
 }
 
 .btn:hover {
@@ -135,74 +140,74 @@ margin: 0 auto;
 }
 
 /* Overview Section */
+.overview-intro {
+text-align: center;
+margin-bottom: 3rem;
+font-size: 1.1rem;
+color: var(--text-muted);
+max-width: 800px;
+margin-left: auto;
+margin-right: auto;
+}
+
+.overview-components {
+display: flex;
+flex-direction: column;
+gap: 3rem;
+}
+
+.component-card {
+background: white;
+border-radius: 12px;
+padding: 2rem;
+box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+border: 1px solid rgba(44,62,80,0.1);
+}
+
+.component-card h3 {
+color: var(--accent);
+margin-bottom: 1.5rem;
+font-size: 1.5rem;
+text-align: center;
+font-weight: 600;
+}
+
+.component-content {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 2rem;
+align-items: center;
+}
+
+.component-image {
+text-align: center;
+}
+
+.component-image canvas {
+border-radius: 8px;
+background: white;
+border: 1px solid rgba(44,62,80,0.1);
+}
+
+.image-caption {
+font-size: 0.9rem;
+color: var(--text-muted);
+font-style: italic;
+margin-top: 0.5rem;
+}
+
+.component-description {
+font-size: 1rem;
+line-height: 1.6;
+color: var(--text);
+}
+
 .overview-section {
 background: var(--surface);
 padding: 2.5rem;
 border-radius: 12px;
 box-shadow: var(--shadow);
 margin: 2rem 0;
-}
-
-.overview-grid {
-display: grid;
-grid-template-columns: 1fr;
-gap: 2rem;
-margin-top: 2rem;
-}
-
-.method-description {
-text-align: center;
-font-size: 1rem;
-color: var(--text-muted);
-margin: 1rem 0;
-}
-
-/* Visualization sections */
-.viz-section {
-background: var(--surface);
-padding: 2.5rem;
-border-radius: 12px;
-box-shadow: var(--shadow);
-margin: 2rem 0;
-}
-
-.viz-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-gap: 2rem;
-margin-top: 2rem;
-}
-
-.viz-card {
-background: #f8f9fa;
-border-radius: 12px;
-padding: 1.5rem;
-text-align: center;
-box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-transition: all 0.3s ease;
-}
-
-.viz-card:hover {
-transform: translateY(-2px);
-box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-}
-
-.viz-card canvas {
-border-radius: 8px;
-background: white;
-}
-
-.viz-caption {
-margin-top: 1rem;
-font-weight: 600;
-color: var(--text);
-font-size: 1.1rem;
-}
-
-.viz-description {
-font-size: 0.9rem;
-color: var(--text-dim);
-margin-top: 0.5rem;
 }
 
 /* Performance section */
@@ -317,13 +322,28 @@ text-align: left !important;
 font-weight: 600;
 }
 
+.method-description {
+text-align: center;
+font-size: 1rem;
+color: var(--text-muted);
+margin: 1rem 0;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
 .hero h1 {
 font-size: 1.8rem;
 }
 
-.viz-grid,
+.component-content {
+grid-template-columns: 1fr;
+gap: 1.5rem;
+}
+
+.component-card {
+padding: 1.5rem;
+}
+
 .charts {
 grid-template-columns: 1fr;
 }
@@ -405,52 +425,29 @@ Existing convolutional learning methods for 3D point cloud data are divided into
 <section class="fade-in">
 <div class="overview-section">
 <h2>Overview</h2>
-<p class="method-description">Pipeline: Given multi-view images as input, we separately reconstruct the appearance and geometry of the scene. Next, we generate a height map and apply shallow-water simulation to produce dynamic water effects, including waves and splashes.</p>
 
-<div class="overview-grid">
-<div class="viz-card">
+<!-- 整体方法描述 -->
+<div class="overview-intro">
+<p>PointCNN++ introduces a novel architectural design that fundamentally mitigates the precision-performance trade-off in 3D point cloud processing through three key innovations:</p>
+</div>
+
+<!-- 三个主要组件 -->
+<div class="overview-components">
+
+<!-- 3D Convolution Kernel Structure -->
+<div class="component-card">
+<h3>3D Convolution Kernel Structure</h3>
+<div class="component-content">
+<div class="component-image">
 <canvas id="kernel3D" width="320" height="360"></canvas>
-<div class="viz-caption">3D Convolution Kernel Structure</div>
-<div class="viz-description">3×3×3 kernel structure and point cloud grouping demonstration</div>
+<p class="image-caption">3×3×3 kernel structure and point cloud grouping demonstration</p>
+</div>
+<div class="component-description">
+<p>We introduce a point-centric convolution where the receptive field is centered on the original, high-precision point coordinates, enabling efficient sparse convolution from voxels to points.</p>
 </div>
 </div>
-</div>
-</section>
-
-<!-- 3D Convolution Visualization -->
-<section class="fade-in">
-<div class="viz-section">
-<h2>3D Convolution Kernel Position Mapping</h2>
-<p class="method-description">3×3×3 kernel structure and point cloud grouping demonstration</p>
-
-<div class="viz-grid">
-<div class="viz-card">
-<canvas id="groupingDemo" width="480" height="400"></canvas>
-<div class="viz-caption">Point Cloud Grouping Processing</div>
-<div class="viz-description">Real-time visualization of how point clouds are processed through our 3D convolution kernel</div>
 </div>
 
-<div class="viz-card">
-<canvas id="traditionalAccess" width="360" height="300"></canvas>
-<div class="viz-caption">3D Kernel Positions Flattening</div>
-<div class="viz-description">26 positions from 3×3×3 cube flattened into sequential order</div>
-</div>
-</div>
-</div>
-</section>
-
-<!-- Memory Access Pattern -->
-<section class="fade-in">
-<div class="viz-section">
-<h2>Memory Access Pattern Optimization</h2>
-<p class="method-description">3×3×3 kernel positions flattening and sequential processing</p>
-
-<div class="viz-grid">
-<div class="viz-card">
-<canvas id="optimizedAccess" width="360" height="300"></canvas>
-<div class="viz-caption">Sequential Weight Processing</div>
-<div class="viz-description">Each weight processes its corresponding point clusters in sequence</div>
-</div>
 </div>
 </div>
 </section>
@@ -1050,165 +1047,6 @@ requestAnimationFrame(drawGrouping);
 drawGrouping();
 }
 
-// Other animation functions (similar updates with color scheme)
-function draw3DFlattening(canvas) {
-const ctx = canvas.getContext('2d');
-const dpr = window.devicePixelRatio || 1;
-const rect = canvas.getBoundingClientRect();
-
-canvas.width = rect.width * dpr;
-canvas.height = rect.height * dpr;
-canvas.style.width = rect.width + 'px';
-canvas.style.height = rect.height + 'px';
-ctx.scale(dpr, dpr);
-
-const w = rect.width, h = rect.height;
-let frame = 0;
-
-// Generate 26 positions (excluding center) with exact ordering
-const positions3D = [];
-let posIndex = 0;
-for(let z = 0; z < 3; z++) {
-for(let y = 0; y < 3; y++) {
-for(let x = 0; x < 3; x++) {
-const isCenter = (x === 1 && y === 1 && z === 1);
-if(isCenter) continue;
-                
-positions3D.push({
-x3d: x - 1,
-y3d: y - 1,
-z3d: z - 1,
-id: posIndex + 1,
-color: `hsl(${(posIndex * 14 + 210) % 360}, 60%, 50%)`
-});
-posIndex++;
-}
-}
-}
-
-function drawFlattening() {
-ctx.clearRect(0, 0, w, h);
-    
-// Draw title
-ctx.fillStyle = '#2c3e50';
-ctx.font = 'bold 14px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText('3×3×3 Kernel Positions → Flattened Array', w/2, 20);
-
-// Animation cycle: 3D positions -> flattening -> flat array
-const cycleTime = 400; // frames per cycle
-const currentPhase = (frame % cycleTime) / cycleTime;
-
-if(currentPhase < 0.3) {
-// Phase 1: Show 3D cube positions
-const centerX = w/4;
-const centerY = h/2;
-const cubeSize = 8;
-const spacing = 12;
-        
-// Draw 3D positions
-positions3D.forEach((pos, idx) => {
-const x3d = pos.x3d * spacing;
-const y3d = pos.y3d * spacing;
-const z3d = pos.z3d * spacing;
-            
-// Isometric projection
-const isoX = centerX + (x3d - y3d) * 0.866;
-const isoY = centerY + (x3d + y3d) * 0.5 - z3d * 0.8;
-            
-ctx.fillStyle = pos.color;
-ctx.fillRect(isoX - cubeSize/2, isoY - cubeSize/2, cubeSize, cubeSize);
-            
-// ID label
-ctx.fillStyle = '#ffffff';
-ctx.font = '8px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText(pos.id.toString(), isoX, isoY + 2);
-});
-        
-// Phase label
-ctx.fillStyle = '#3498db';
-ctx.font = '12px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText('3×3×3 Cube Positions', centerX, h - 30);
-
-} else if(currentPhase < 0.7) {
-// Phase 2: Flattening animation
-const progress = (currentPhase - 0.3) / 0.4;
-const centerX = w/4;
-const centerY = h/2;
-const cubeSize = 8;
-const spacing = 12;
-        
-const flatStartX = w * 0.55;
-const flatY = h/2;
-const flatSpacing = 12;
-        
-positions3D.forEach((pos, idx) => {
-// 3D position
-const x3d = pos.x3d * spacing;
-const y3d = pos.y3d * spacing;
-const z3d = pos.z3d * spacing;
-const isoX = centerX + (x3d - y3d) * 0.866;
-const isoY = centerY + (x3d + y3d) * 0.5 - z3d * 0.8;
-            
-// Flat position
-const flatX = flatStartX + (idx % 13) * flatSpacing;
-const flatYPos = flatY + Math.floor(idx / 13) * flatSpacing - flatSpacing/2;
-            
-// Interpolate between 3D and flat positions
-const currentX = isoX + (flatX - isoX) * progress;
-const currentY = isoY + (flatYPos - isoY) * progress;
-            
-ctx.fillStyle = pos.color;
-ctx.fillRect(currentX - cubeSize/2, currentY - cubeSize/2, cubeSize, cubeSize);
-            
-ctx.fillStyle = '#ffffff';
-ctx.font = '8px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText(pos.id.toString(), currentX, currentY + 2);
-});
-        
-// Phase label
-ctx.fillStyle = '#3498db';
-ctx.font = '12px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText('Flattening Process', w/2, h - 30);
-
-} else {
-// Phase 3: Show flat array
-const flatStartX = w * 0.55;
-const flatY = h/2;
-const flatSpacing = 12;
-const cubeSize = 8;
-        
-positions3D.forEach((pos, idx) => {
-const flatX = flatStartX + (idx % 13) * flatSpacing;
-const flatYPos = flatY + Math.floor(idx / 13) * flatSpacing - flatSpacing/2;
-            
-ctx.fillStyle = pos.color;
-ctx.fillRect(flatX - cubeSize/2, flatYPos - cubeSize/2, cubeSize, cubeSize);
-            
-ctx.fillStyle = '#ffffff';
-ctx.font = '8px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText(pos.id.toString(), flatX, flatYPos + 2);
-});
-        
-// Phase label
-ctx.fillStyle = '#3498db';
-ctx.font = '12px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText('Flattened 26-Element Array', w * 0.75, h - 30);
-}
-    
-frame++;
-requestAnimationFrame(drawFlattening);
-}
-
-drawFlattening();
-}
-
 function drawSequentialProcessing(canvas) {
 const ctx = canvas.getContext('2d');
 const dpr = window.devicePixelRatio || 1;
@@ -1398,7 +1236,6 @@ drawProcessing();
 setTimeout(() => {
 draw3DKernel(document.getElementById('kernel3D'));
 drawGroupingDemo(document.getElementById('groupingDemo'));
-draw3DFlattening(document.getElementById('traditionalAccess'));
 drawSequentialProcessing(document.getElementById('optimizedAccess'));
 }, 100);
 
