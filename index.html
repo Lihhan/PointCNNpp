@@ -490,596 +490,162 @@ Chart.defaults.borderColor = 'rgba(44,62,80,0.1)';
 
 // 3D Kernel Visualization
 function draw3DKernel(canvas) {
-const ctx = canvas.getContext('2d');
-const dpr = window.devicePixelRatio || 1;
-const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
     
-canvas.width = rect.width * dpr;
-canvas.height = rect.height * dpr;
-canvas.style.width = rect.width + 'px';
-canvas.style.height = rect.height + 'px';
-ctx.scale(dpr, dpr);
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+    ctx.scale(dpr, dpr);
 
-const w = rect.width, h = rect.height;
-let frame = 0;
+    const w = rect.width, h = rect.height;
+    let frame = 0;
 
-function drawKernel() {
-ctx.clearRect(0, 0, w, h);
-    
-// Draw title
-ctx.fillStyle = '#2c3e50';
-ctx.font = 'bold 14px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText('3×3×3 Convolution Kernel', w/2, 25);
+    function drawKernel() {
+        ctx.clearRect(0, 0, w, h);
+        
+        // Draw title
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = 'bold 14px "Segoe UI", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('3×3×3 Convolution Kernel', w/2, 25);
 
-// 3D isometric projection
-const centerX = w/2;
-const centerY = h/2 + 20;
-const cubeSize = 18;
-const spacing = 20;
-    
-// Rotation angle for 3D effect
-const angle = frame * 0.01;
-const cosA = Math.cos(angle);
-const sinA = Math.sin(angle);
-    
-// Draw 27 cubes in 3×3×3 arrangement
-const cubes = [];
-    
-for(let z = 0; z < 3; z++) {
-for(let y = 0; y < 3; y++) {
-for(let x = 0; x < 3; x++) {
-// 3D coordinates
-const x3d = (x - 1) * spacing;
-const y3d = (y - 1) * spacing;
-const z3d = (z - 1) * spacing;
-                
-// Rotate around Y axis
-const rotatedX = x3d * cosA - z3d * sinA;
-const rotatedZ = x3d * sinA + z3d * cosA;
-                
-// Isometric projection
-const isoX = centerX + (rotatedX - y3d) * 0.866;
-const isoY = centerY + (rotatedX + y3d) * 0.5 - rotatedZ * 0.7;
-                
-const isCenter = (x === 1 && y === 1 && z === 1);
-                
-cubes.push({
-x: isoX,
-y: isoY,
-z: rotatedZ,
-isCenter: isCenter,
-originalPos: {x, y, z}
-});
-}
-}
-}
-    
-// Sort by z-order for proper 3D rendering
-cubes.sort((a, b) => a.z - b.z);
-    
-// Draw cubes
-cubes.forEach(cube => {
-const size = cubeSize;
+        // 3D isometric projection
+        const centerX = w/2;
+        const centerY = h/2 + 20;
+        const cubeSize = 18;
+        const spacing = 20;
         
-// Draw cube faces for 3D effect
-if(cube.isCenter) {
-// Center cube - highlight in accent color
-ctx.fillStyle = '#3498db';
-} else {
-// Regular weight positions
-ctx.fillStyle = '#667eea';
-}
+        // Rotation angle for 3D effect
+        const angle = frame * 0.01;
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
         
-// Main face
-ctx.fillRect(cube.x - size/2, cube.y - size/2, size, size);
+        // Draw 27 cubes in 3×3×3 arrangement
+        const cubes = [];
         
-// Top face (lighter)
-ctx.fillStyle = cube.isCenter ? '#5dade2' : '#8a9fec';
-const topPoints = [
-[cube.x - size/2, cube.y - size/2],
-[cube.x + size/2, cube.y - size/2],
-[cube.x + size/2 + 4, cube.y - size/2 - 4],
-[cube.x - size/2 + 4, cube.y - size/2 - 4]
-];
+        for(let z = 0; z < 3; z++) {
+            for(let y = 0; y < 3; y++) {
+                for(let x = 0; x < 3; x++) {
+                    // 3D coordinates
+                    const x3d = (x - 1) * spacing;
+                    const y3d = (y - 1) * spacing;
+                    const z3d = (z - 1) * spacing;
+                    
+                    // Rotate around Y axis
+                    const rotatedX = x3d * cosA - z3d * sinA;
+                    const rotatedZ = x3d * sinA + z3d * cosA;
+                    
+                    // Isometric projection
+                    const isoX = centerX + (rotatedX - y3d) * 0.866;
+                    const isoY = centerY + (rotatedX + y3d) * 0.5 - rotatedZ * 0.7;
+                    
+                    const isCenter = (x === 1 && y === 1 && z === 1);
+                    
+                    cubes.push({
+                        x: isoX,
+                        y: isoY,
+                        z: rotatedZ,
+                        isCenter: isCenter,
+                        originalPos: {x, y, z}
+                    });
+                }
+            }
+        }
         
-ctx.beginPath();
-ctx.moveTo(...topPoints[0]);
-topPoints.slice(1).forEach(point => ctx.lineTo(...point));
-ctx.closePath();
-ctx.fill();
+        // Sort by z-order for proper 3D rendering
+        cubes.sort((a, b) => a.z - b.z);
         
-// Right face (darker)
-ctx.fillStyle = cube.isCenter ? '#2980b9' : '#5a6fd8';
-const rightPoints = [
-[cube.x + size/2, cube.y - size/2],
-[cube.x + size/2, cube.y + size/2],
-[cube.x + size/2 + 4, cube.y + size/2 - 4],
-[cube.x + size/2 + 4, cube.y - size/2 - 4]
-];
-        
-ctx.beginPath();
-ctx.moveTo(...rightPoints[0]);
-rightPoints.slice(1).forEach(point => ctx.lineTo(...point));
-ctx.closePath();
-ctx.fill();
-        
-// Outline
-ctx.strokeStyle = '#ffffff';
-ctx.lineWidth = 1;
-ctx.strokeRect(cube.x - size/2, cube.y - size/2, size, size);
-        
-// Position label for some cubes
-if(Math.abs(cube.z) < 10 && !cube.isCenter) {
-ctx.fillStyle = '#ffffff';
-ctx.font = '8px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-const relX = cube.originalPos.x - 1;
-const relY = cube.originalPos.y - 1;
-const relZ = cube.originalPos.z - 1;
-ctx.fillText(`${relX},${relY},${relZ}`, cube.x, cube.y + 2);
-}
-        
-if(cube.isCenter) {
-ctx.fillStyle = '#ffffff';
-ctx.font = 'bold 8px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText('CENTER', cube.x, cube.y + 2);
-}
-});
-    
-// Legend
-ctx.fillStyle = '#2c3e50';
-ctx.font = '11px "Segoe UI", sans-serif';
-ctx.textAlign = 'left';
-ctx.fillText('Blue: Center position (no weight)', 20, h - 30);
-ctx.fillText('Purple: 26 weight positions', 20, h - 15);
-    
-frame++;
-requestAnimationFrame(drawKernel);
-}
-
-drawKernel();
-}
-
-// Point Cloud Grouping Demo - same as original but updated colors
-function drawGroupingDemo(canvas) {
-const ctx = canvas.getContext('2d');
-const dpr = window.devicePixelRatio || 1;
-const rect = canvas.getBoundingClientRect();
-    
-canvas.width = rect.width * dpr;
-canvas.height = rect.height * dpr;
-canvas.style.width = rect.width + 'px';
-canvas.style.height = rect.height + 'px';
-ctx.scale(dpr, dpr);
-
-const w = rect.width, h = rect.height;
-let frame = 0;
-
-// Generate static background points
-const bgPoints = [];
-const totalPoints = 300;
-
-for(let i = 0; i < totalPoints; i++) {
-let x, y, density;
-    
-const region = Math.random();
-if(region < 0.3) {
-// High density region
-x = Math.random() * w;
-y = Math.random() * h * 0.3;
-density = 1.0;
-} else if(region < 0.6) {
-// Medium density region
-x = Math.random() * w;
-y = h * 0.3 + Math.random() * h * 0.4;
-density = 0.7;
-} else {
-// Lower density
-x = Math.random() * w;
-y = h * 0.7 + Math.random() * h * 0.3;
-density = 0.4;
-}
-    
-bgPoints.push({
-x: x,
-y: y,
-opacity: 0.2 + density * 0.5,
-size: 1 + density
-});
-}
-
-// Create precise mapping from 3D cube positions to 1D weight indices
-const positionToWeightMapping = [];
-let weightIndex = 0;
-
-// Traverse 3D cube in z,y,x order (same as kernel generation)
-for(let z = 0; z < 3; z++) {
-for(let y = 0; y < 3; y++) {
-for(let x = 0; x < 3; x++) {
-const isCenter = (x === 1 && y === 1 && z === 1);
-if(isCenter) continue;
-                
-positionToWeightMapping.push({
-pos3D: {x, y, z},
-weightId: weightIndex + 1,
-relativePos: {x: x - 1, y: y - 1, z: z - 1} // relative to center
-});
-weightIndex++;
-}
-}
-}
-
-// Generate point clusters precisely mapped to 3D positions
-const kernelX = w/2;
-const kernelY = h/2;
-const kernelScale = 35;
-const cavitySize = kernelScale * 0.7;
-const spacing = kernelScale * 0.85;
-const cavityPoints = [];
-
-positionToWeightMapping.forEach(mapping => {
-const {x, y, z} = mapping.pos3D;
-const x3d = (x - 1) * spacing;
-const y3d = (y - 1) * spacing;
-const z3d = (z - 1) * spacing;
-        
-// Calculate cavity position using same projection as 3D kernel
-const cavityX = kernelX + x3d + z3d * 0.3;
-const cavityY = kernelY + y3d - z3d * 0.2;
-        
-const pointsInCavity = [];
-const numPoints = 8 + Math.floor(Math.random() * 12);
-        
-for(let p = 0; p < numPoints; p++) {
-pointsInCavity.push({
-x: cavityX + (Math.random() - 0.5) * (cavitySize * 0.9),
-y: cavityY + (Math.random() - 0.5) * (cavitySize * 0.9)
-});
-}
-        
-cavityPoints.push({
-cavityX: cavityX,
-cavityY: cavityY,
-weightId: mapping.weightId,
-pos3D: mapping.pos3D,
-relativePos: mapping.relativePos,
-points: pointsInCavity,
-color: `hsl(${((mapping.weightId-1) * 14 + 210) % 360}, 60%, 50%)`
-});
-});
-
-function drawGrouping() {
-ctx.clearRect(0, 0, w, h);
-    
-// Draw title
-ctx.fillStyle = '#2c3e50';
-ctx.font = 'bold 14px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText('Point Cloud with 3×3×3 Kernel Processing', w/2, 25);
-
-// Draw static background points
-bgPoints.forEach(point => {
-const kernelLeft = kernelX - kernelScale * 1.5;
-const kernelRight = kernelX + kernelScale * 1.5;
-const kernelTop = kernelY - kernelScale * 1.5;
-const kernelBottom = kernelY + kernelScale * 1.5;
-        
-if(point.x >= kernelLeft && point.x <= kernelRight && 
-point.y >= kernelTop && point.y <= kernelBottom) {
-return;
-}
-        
-ctx.globalAlpha = point.opacity;
-ctx.fillStyle = '#95a5a6';
-ctx.beginPath();
-ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2);
-ctx.fill();
-});
-ctx.globalAlpha = 1;
-    
-// Draw kernel boundary
-ctx.strokeStyle = 'rgba(52, 152, 219, 0.3)';
-ctx.lineWidth = 2;
-ctx.strokeRect(kernelX - kernelScale * 1.5, kernelY - kernelScale * 1.5, 
-kernelScale * 3, kernelScale * 3);
-    
-// Label
-ctx.fillStyle = '#3498db';
-ctx.font = 'bold 12px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText('3×3×3 Kernel Region', kernelX, kernelY - kernelScale * 1.8);
-    
-// Current processing weight (cycles through 1-26)
-const currentProcessingId = Math.floor(frame / 80) % 26 + 1;
-const currentMapping = positionToWeightMapping.find(m => m.weightId === currentProcessingId);
-    
-// Draw cavities and static points
-cavityPoints.forEach(cavity => {
-const isProcessing = (cavity.weightId === currentProcessingId);
-        
-// Draw cavity outline
-ctx.strokeStyle = isProcessing ? '#e74c3c' : cavity.color;
-ctx.lineWidth = isProcessing ? 3 : 1.5;
-ctx.globalAlpha = isProcessing ? 1 : 0.4;
-        
-ctx.strokeRect(cavity.cavityX - cavitySize/2, cavity.cavityY - cavitySize/2, 
-cavitySize, cavitySize);
-        
-// Draw points in cavity
-cavity.points.forEach(point => {
-if(isProcessing) {
-// Highlight when processing
-const progress = (frame % 80) / 80;
-const alpha = 0.6 + 0.4 * Math.sin(progress * Math.PI * 4);
-const size = 2 + Math.sin(progress * Math.PI * 6) * 0.5;
-                
-ctx.globalAlpha = alpha;
-ctx.fillStyle = '#e74c3c';
-ctx.beginPath();
-ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
-ctx.fill();
-                
-// Processing glow effect
-if(progress > 0.3) {
-ctx.strokeStyle = '#e74c3c';
-ctx.lineWidth = 1.5;
-ctx.globalAlpha = 0.3;
-ctx.beginPath();
-ctx.arc(point.x, point.y, size + 2, 0, Math.PI * 2);
-ctx.stroke();
-}
-} else {
-// Regular static points
-ctx.fillStyle = cavity.color;
-ctx.globalAlpha = 0.6;
-ctx.beginPath();
-ctx.arc(point.x, point.y, 1.5, 0, Math.PI * 2);
-ctx.fill();
-}
-});
-        
-// Weight ID and position label for processing cavity
-if(isProcessing) {
-ctx.globalAlpha = 1;
-ctx.fillStyle = '#e74c3c';
-ctx.font = 'bold 11px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText(`Weight ${cavity.weightId}`, cavity.cavityX, cavity.cavityY - cavitySize/2 - 18);
+        // Draw cubes
+        cubes.forEach(cube => {
+            const size = cubeSize;
             
-ctx.font = '9px "Segoe UI", sans-serif';
-ctx.fillText(`Pos(${cavity.relativePos.x},${cavity.relativePos.y},${cavity.relativePos.z})`, 
-cavity.cavityX, cavity.cavityY - cavitySize/2 - 6);
-}
+            // Draw cube faces for 3D effect
+            if(cube.isCenter) {
+                // Center cube - highlight in accent color
+                ctx.fillStyle = '#3498db';
+            } else {
+                // Regular weight positions
+                ctx.fillStyle = '#667eea';
+            }
+            
+            // Main face
+            ctx.fillRect(cube.x - size/2, cube.y - size/2, size, size);
+            
+            // Top face (lighter)
+            ctx.fillStyle = cube.isCenter ? '#5dade2' : '#8a9fec';
+            const topPoints = [
+                [cube.x - size/2, cube.y - size/2],
+                [cube.x + size/2, cube.y - size/2],
+                [cube.x + size/2 + 4, cube.y - size/2 - 4],
+                [cube.x - size/2 + 4, cube.y - size/2 - 4]
+            ];
+            
+            ctx.beginPath();
+            ctx.moveTo(...topPoints[0]);
+            topPoints.slice(1).forEach(point => ctx.lineTo(...point));
+            ctx.closePath();
+            ctx.fill();
+            
+            // Right face (darker)
+            ctx.fillStyle = cube.isCenter ? '#2980b9' : '#5a6fd8';
+            const rightPoints = [
+                [cube.x + size/2, cube.y - size/2],
+                [cube.x + size/2, cube.y + size/2],
+                [cube.x + size/2 + 4, cube.y + size/2 - 4],
+                [cube.x + size/2 + 4, cube.y - size/2 - 4]
+            ];
+            
+            ctx.beginPath();
+            ctx.moveTo(...rightPoints[0]);
+            rightPoints.slice(1).forEach(point => ctx.lineTo(...point));
+            ctx.closePath();
+            ctx.fill();
+            
+            // Outline
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(cube.x - size/2, cube.y - size/2, size, size);
+            
+            // Position label for some cubes
+            if(Math.abs(cube.z) < 10 && !cube.isCenter) {
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '8px "Segoe UI", sans-serif';
+                ctx.textAlign = 'center';
+                const relX = cube.originalPos.x - 1;
+                const relY = cube.originalPos.y - 1;
+                const relZ = cube.originalPos.z - 1;
+                ctx.fillText(`${relX},${relY},${relZ}`, cube.x, cube.y + 2);
+            }
+            
+            if(cube.isCenter) {
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 8px "Segoe UI", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('CENTER', cube.x, cube.y + 2);
+            }
+        });
         
-ctx.globalAlpha = 1;
-});
-    
-// Processing status with 3D position info
-ctx.fillStyle = '#3498db';
-ctx.font = '12px "Segoe UI", sans-serif';
-ctx.textAlign = 'left';
-ctx.fillText(`Current Weight ID: ${currentProcessingId}/26`, 20, h - 40);
-
-if(currentMapping) {
-ctx.fillText(`3D Position: (${currentMapping.relativePos.x}, ${currentMapping.relativePos.y}, ${currentMapping.relativePos.z})`, 20, h - 25);
-}
-
-// Progress indicator
-const progressWidth = 120;
-const progressX = w - progressWidth - 20;
-const progressY = h - 35;
-
-ctx.fillStyle = '#ecf0f1';
-ctx.fillRect(progressX, progressY, progressWidth, 8);
-
-const progress = (currentProcessingId - 1 + (frame % 80) / 80) / 26;
-ctx.fillStyle = '#3498db';
-ctx.fillRect(progressX, progressY, progressWidth * progress, 8);
-
-ctx.fillStyle = '#2c3e50';
-ctx.font = '10px "Segoe UI", sans-serif';
-ctx.textAlign = 'right';
-ctx.fillText(`${Math.floor(progress * 100)}%`, progressX + progressWidth, progressY - 5);
-    
-frame++;
-requestAnimationFrame(drawGrouping);
-}
-
-drawGrouping();
-}
-
-function drawSequentialProcessing(canvas) {
-const ctx = canvas.getContext('2d');
-const dpr = window.devicePixelRatio || 1;
-const rect = canvas.getBoundingClientRect();
-
-canvas.width = rect.width * dpr;
-canvas.height = rect.height * dpr;
-canvas.style.width = rect.width + 'px';
-canvas.style.height = rect.height + 'px';
-ctx.scale(dpr, dpr);
-
-const w = rect.width, h = rect.height;
-let frame = 0;
-
-// Create precise mapping (same order as flattening)
-const weightMapping = [];
-let weightIndex = 0;
-
-for(let z = 0; z < 3; z++) {
-for(let y = 0; y < 3; y++) {
-for(let x = 0; x < 3; x++) {
-const isCenter = (x === 1 && y === 1 && z === 1);
-if(isCenter) continue;
-                
-weightMapping.push({
-id: weightIndex + 1,
-pos3D: {x, y, z},
-relativePos: {x: x - 1, y: y - 1, z: z - 1},
-color: `hsl(${(weightIndex * 14 + 210) % 360}, 60%, 50%)`
-});
-weightIndex++;
-}
-}
-}
-
-// Generate clusters with consistent spatial distribution
-const clusters = weightMapping.map((weight, idx) => {
-// Use position info to determine cluster location
-const baseX = 50 + (weight.pos3D.x / 3) * (w - 100);
-const baseY = 100 + (weight.pos3D.y / 3) * (h - 200) + (weight.pos3D.z / 3) * 30;
-    
-const numPoints = 8 + Math.floor(Math.random() * 12);
-const points = [];
-    
-for(let j = 0; j < numPoints; j++) {
-points.push({
-x: baseX + (Math.random() - 0.5) * 50,
-y: baseY + (Math.random() - 0.5) * 40
-});
-}
-    
-return {
-weightId: weight.id,
-pos3D: weight.pos3D,
-relativePos: weight.relativePos,
-points: points,
-color: weight.color
-};
-});
-
-function drawProcessing() {
-ctx.clearRect(0, 0, w, h);
-    
-// Draw title
-ctx.fillStyle = '#2c3e50';
-ctx.font = 'bold 14px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText('Sequential Weight Processing', w/2, 20);
-
-// Draw weight array at top (flattened order)
-const weightY = 45;
-const weightSize = 10;
-const weightSpacing = (w - 40) / 26;
+        // Legend
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = '11px "Segoe UI", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Blue: Center position (no weight)', 20, h - 30);
+        ctx.fillText('Purple: 26 weight positions', 20, h - 15);
         
-weightMapping.forEach((weight, idx) => {
-const weightX = 20 + idx * weightSpacing;
-ctx.fillStyle = weight.color;
-ctx.fillRect(weightX, weightY, weightSize, weightSize);
-        
-ctx.fillStyle = '#ffffff';
-ctx.font = '8px "Segoe UI", sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText(weight.id.toString(), weightX + weightSize/2, weightY + 7);
-});
+        frame++;
+        requestAnimationFrame(drawKernel);
+    }
 
-// Current processing weight
-const currentWeightIdx = Math.floor(frame / 90) % 26;
-const currentWeight = weightMapping[currentWeightIdx];
-
-// Highlight current weight
-const currentWeightX = 20 + currentWeightIdx * weightSpacing;
-ctx.strokeStyle = '#e74c3c';
-ctx.lineWidth = 3;
-ctx.strokeRect(currentWeightX - 2, weightY - 2, weightSize + 4, weightSize + 4);
-
-// Draw all clusters
-clusters.forEach((cluster, idx) => {
-const isCurrentCluster = (idx === currentWeightIdx);
-        
-cluster.points.forEach(point => {
-if(isCurrentCluster) {
-// Animate current cluster processing
-const progress = (frame % 90) / 90;
-const alpha = 0.5 + 0.5 * Math.sin(progress * Math.PI * 4);
-const size = 2 + Math.sin(progress * Math.PI * 6) * 0.5;
-                
-ctx.globalAlpha = alpha;
-ctx.fillStyle = '#e74c3c';
-ctx.beginPath();
-ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
-ctx.fill();
-                
-// Processing glow effect
-if(progress > 0.2) {
-ctx.strokeStyle = '#e74c3c';
-ctx.lineWidth = 2;
-ctx.globalAlpha = 0.3;
-ctx.beginPath();
-ctx.arc(point.x, point.y, size + 3, 0, Math.PI * 2);
-ctx.stroke();
-}
-} else {
-// Static inactive clusters
-ctx.globalAlpha = 0.3;
-ctx.fillStyle = cluster.color;
-ctx.beginPath();
-ctx.arc(point.x, point.y, 1.5, 0, Math.PI * 2);
-ctx.fill();
-}
-});
-        
-ctx.globalAlpha = 1;
-});
-
-// Draw connection line from weight to cluster
-const currentCluster = clusters[currentWeightIdx];
-if(currentCluster.points.length > 0) {
-const clusterCenterX = currentCluster.points.reduce((sum, p) => sum + p.x, 0) / currentCluster.points.length;
-const clusterCenterY = currentCluster.points.reduce((sum, p) => sum + p.y, 0) / currentCluster.points.length;
-        
-const weightCenterX = currentWeightX + weightSize/2;
-const weightCenterY = weightY + weightSize;
-        
-ctx.strokeStyle = '#e74c3c';
-ctx.lineWidth = 2;
-ctx.setLineDash([5, 5]);
-ctx.beginPath();
-ctx.moveTo(weightCenterX, weightCenterY);
-ctx.lineTo(clusterCenterX, clusterCenterY);
-ctx.stroke();
-ctx.setLineDash([]);
-}
-
-// Status text with position mapping info
-ctx.fillStyle = '#3498db';
-ctx.font = '12px "Segoe UI", sans-serif';
-ctx.textAlign = 'left';
-ctx.fillText(`Processing Weight ${currentWeight.id}/26`, 20, h - 55);
-ctx.fillText(`3D Position: (${currentWeight.relativePos.x}, ${currentWeight.relativePos.y}, ${currentWeight.relativePos.z})`, 20, h - 40);
-ctx.fillText(`Cluster: ${currentCluster.points.length} points`, 20, h - 25);
-
-// Progress indicator
-const progressWidth = 120;
-const progressX = w - progressWidth - 20;
-const progressY = h - 35;
-
-ctx.fillStyle = '#ecf0f1';
-ctx.fillRect(progressX, progressY, progressWidth, 8);
-
-const progress = (currentWeightIdx + (frame % 90) / 90) / 26;
-ctx.fillStyle = '#3498db';
-ctx.fillRect(progressX, progressY, progressWidth * progress, 8);
-
-ctx.fillStyle = '#2c3e50';
-ctx.font = '10px "Segoe UI", sans-serif';
-ctx.textAlign = 'right';
-ctx.fillText(`${Math.floor(progress * 100)}%`, progressX + progressWidth, progressY - 5);
-    
-frame++;
-requestAnimationFrame(drawProcessing);
-}
-
-drawProcessing();
+    drawKernel();
 }
 
 // Initialize visualizations
 setTimeout(() => {
-draw3DKernel(document.getElementById('kernel3D'));
-drawGroupingDemo(document.getElementById('groupingDemo'));
-drawSequentialProcessing(document.getElementById('optimizedAccess'));
+    const kernel3D = document.getElementById('kernel3D');
+    if (kernel3D) draw3DKernel(kernel3D);
 }, 100);
 
 // Toggle functionality
@@ -1088,234 +654,317 @@ const btnSingle = document.getElementById('btnSingle');
 const resDiv = document.getElementById('resnetCharts');
 const singleDiv = document.getElementById('singleCharts');
 
-btnRes.onclick = () => {
-btnRes.classList.add('active');
-btnSingle.classList.remove('active');
-resDiv.style.display = 'block';
-singleDiv.style.display = 'none';
-};
+if (btnRes && btnSingle && resDiv && singleDiv) {
+    btnRes.onclick = () => {
+        btnRes.classList.add('active');
+        btnSingle.classList.remove('active');
+        resDiv.style.display = 'block';
+        singleDiv.style.display = 'none';
+    };
 
-btnSingle.onclick = () => {
-btnSingle.classList.add('active');
-btnRes.classList.remove('active');
-resDiv.style.display = 'none';
-singleDiv.style.display = 'block';
-};
+    btnSingle.onclick = () => {
+        btnSingle.classList.add('active');
+        btnRes.classList.remove('active');
+        resDiv.style.display = 'none';
+        singleDiv.style.display = 'block';
+    };
+}
 
-// Performance charts data and setup (same as original but updated colors)
-const methods = ['KPConv','O-CNN','MinkowskiEng.','TorchSparse++','SPConv','fVDB','Ours (deg.)','Ours'];
+// ResNet-18 backbone charts data
+const resnetMethods = ['KPConv','O-CNN','MinkowskiEng.','TorchSparse++','SPConv','fVDB','Ours (deg.)','Ours'];
 const fwd = [3316.6,199.3,78.3,83.7,62.8,49.6,60.4,51.5];
 const bwd = [6331.1,351.1,212.3,152.1,133.9,105.6,71.5,67.0];
 
+// ResNet time chart
 new Chart('timeChart', {
-type: 'bar',
-data: {
-labels: methods,
-datasets: [
-{label: 'Forward (ms)', data: fwd, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1},
-{label: 'Backward (ms)', data: bwd, backgroundColor: '#e74c3c', borderColor: '#c0392b', borderWidth: 1}
-]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: {
-title: {display: true, text: 'Execution Time Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
-legend: {position: 'top', labels: {color: '#2c3e50'}}
-},
-scales: {
-y: {
-type: 'logarithmic',
-min: 10,
-max: 10000,
-title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
-grid: {color: 'rgba(44,62,80,0.1)'},
-ticks: {color: '#2c3e50'}
-},
-x: {
-grid: {color: 'rgba(44,62,80,0.05)'},
-ticks: {color: '#2c3e50'}
-}
-}
-}
+    type: 'bar',
+    data: {
+        labels: resnetMethods,
+        datasets: [
+            {label: 'Forward (ms)', data: fwd, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1},
+            {label: 'Backward (ms)', data: bwd, backgroundColor: '#e74c3c', borderColor: '#c0392b', borderWidth: 1}
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            title: {display: true, text: 'ResNet-18 Execution Time Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
+            legend: {position: 'top', labels: {color: '#2c3e50'}}
+        },
+        scales: {
+            y: {
+                type: 'logarithmic',
+                min: 10,
+                max: 10000,
+                title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
+                grid: {color: 'rgba(44,62,80,0.1)'},
+                ticks: {color: '#2c3e50'}
+            },
+            x: {
+                grid: {color: 'rgba(44,62,80,0.05)'},
+                ticks: {color: '#2c3e50'}
+            }
+        }
+    }
 });
 
+// ResNet memory chart
 const memLabels = ['O-CNN','KPConv','TorchSparse++','SPConv','MinkowskiEng.','fVDB','Ours (deg.)','Ours'];
 const infM = [10.93,4.64,3.08,2.64,1.20,0.72,0.38,0.37];
 const backM = [11.61,8.24,3.08,2.64,1.20,1.79,0.59,0.55];
 
 new Chart('memChart', {
-type: 'bar',
-data: {
-labels: memLabels,
-datasets: [
-{label: 'Inference (GB)', data: infM, backgroundColor: '#85c1e9', borderColor: '#5dade2', borderWidth: 1},
-{label: 'Training (GB)', data: backM, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1}
-]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: {
-title: {display: true, text: 'Memory Usage Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
-legend: {position: 'top', labels: {color: '#2c3e50'}}
-},
-scales: {
-y: {
-beginAtZero: true,
-title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
-grid: {color: 'rgba(44,62,80,0.1)'},
-ticks: {color: '#2c3e50'}
-}
-,
-x: {
-grid: {color: 'rgba(44,62,80,0.05)'},
-ticks: {color: '#2c3e50'}
-}
-}
-}
+    type: 'bar',
+    data: {
+        labels: memLabels,
+        datasets: [
+            {label: 'Inference (GB)', data: infM, backgroundColor: '#85c1e9', borderColor: '#5dade2', borderWidth: 1},
+            {label: 'Training (GB)', data: backM, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1}
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            title: {display: true, text: 'ResNet-18 Memory Usage Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
+            legend: {position: 'top', labels: {color: '#2c3e50'}}
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
+                grid: {color: 'rgba(44,62,80,0.1)'},
+                ticks: {color: '#2c3e50'}
+            },
+            x: {
+                grid: {color: 'rgba(44,62,80,0.05)'},
+                ticks: {color: '#2c3e50'}
+            }
+        }
+    }
 });
 
-// Single-conv layer data and charts
-<script>
-// 数据定义
+// Single convolution layer data
 const memInfData = {
-'KPConv': [16.83, 17.10, 19.81, 18.11, 18.28, 20.30, 24.23, 26.78, 34.02],
-'O-CNN': [3.79, 3.93, 3.09, 3.93, 4.35, 3.07, 4.27, 4.12, 4.83],
-'Minkowski': [1.63, 1.85, 1.97, 1.96, 2.04, 2.31, 2.68, 2.97, 3.75],
-'TorchSparse++': [1.03, 1.15, 1.18, 1.19, 1.23, 1.44, 1.65, 1.79, 2.48],
-'SPConv': [2.86, 3.20, 3.35, 3.45, 3.57, 4.06, 4.69, 5.27, 6.63],
-'fVDB': [1.85, 2.06, 2.15, 2.23, 2.30, 2.61, 3.01, 3.38, 4.26],
-'Ours (deg.)': [0.83, 0.94, 0.99, 1.00, 1.03, 1.16, 1.36, 1.49, 1.89],
-'Ours': [0.81, 0.91, 0.97, 0.97, 1.00, 1.13, 1.32, 1.46, 1.84]
+    'KPConv': [16.83, 17.10, 19.81, 18.11, 18.28, 20.30, 24.23, 26.78, 34.02],
+    'O-CNN': [3.79, 3.93, 3.09, 3.93, 4.35, 3.07, 4.27, 4.12, 4.83],
+    'Minkowski': [1.63, 1.85, 1.97, 1.96, 2.04, 2.31, 2.68, 2.97, 3.75],
+    'TorchSparse++': [1.03, 1.15, 1.18, 1.19, 1.23, 1.44, 1.65, 1.79, 2.48],
+    'SPConv': [2.86, 3.20, 3.35, 3.45, 3.57, 4.06, 4.69, 5.27, 6.63],
+    'fVDB': [1.85, 2.06, 2.15, 2.23, 2.30, 2.61, 3.01, 3.38, 4.26],
+    'Ours (deg.)': [0.83, 0.94, 0.99, 1.00, 1.03, 1.16, 1.36, 1.49, 1.89],
+    'Ours': [0.81, 0.91, 0.97, 0.97, 1.00, 1.13, 1.32, 1.46, 1.84]
 };
 
 const memTrainData = {
-'KPConv': [16.83, 17.10, 19.81, 18.11, 18.28, 20.30, 24.23, 26.78, 34.02],
-'O-CNN': [4.60, 4.76, 3.68, 4.76, 5.25, 3.67, 5.13, 4.94, 5.79],
-'Minkowski': [2.07, 2.35, 2.49, 2.49, 2.58, 2.93, 3.41, 3.77, 4.77],
-'TorchSparse++': [1.40, 1.51, 1.50, 1.51, 1.58, 1.90, 2.35, 2.28, 3.42],
-'SPConv': [4.69, 5.25, 5.48, 5.65, 5.86, 6.65, 7.69, 8.64, 10.88],
-'fVDB': [2.30, 2.57, 2.70, 2.76, 2.85, 3.23, 3.75, 4.18, 5.28],
-'Ours (deg.)': [0.84, 0.94, 0.99, 1.00, 1.04, 1.17, 1.36, 1.50, 1.90],
-'Ours': [0.81, 0.92, 0.97, 0.97, 1.01, 1.14, 1.32, 1.47, 1.85]
+    'KPConv': [16.83, 17.10, 19.81, 18.11, 18.28, 20.30, 24.23, 26.78, 34.02],
+    'O-CNN': [4.60, 4.76, 3.68, 4.76, 5.25, 3.67, 5.13, 4.94, 5.79],
+    'Minkowski': [2.07, 2.35, 2.49, 2.49, 2.58, 2.93, 3.41, 3.77, 4.77],
+    'TorchSparse++': [1.40, 1.51, 1.50, 1.51, 1.58, 1.90, 2.35, 2.28, 3.42],
+    'SPConv': [4.69, 5.25, 5.48, 5.65, 5.86, 6.65, 7.69, 8.64, 10.88],
+    'fVDB': [2.30, 2.57, 2.70, 2.76, 2.85, 3.23, 3.75, 4.18, 5.28],
+    'Ours (deg.)': [0.84, 0.94, 0.99, 1.00, 1.04, 1.17, 1.36, 1.50, 1.90],
+    'Ours': [0.81, 0.92, 0.97, 0.97, 1.01, 1.14, 1.32, 1.47, 1.85]
 };
 
 const timeInfData = {
-'KPConv': [1252.96, 1317.21, 758.55, 702.52, 670.46, 841.32, 1055.93, 1787.70, 1828.72],
-'O-CNN': [123.48, 104.05, 75.90, 105.84, 122.55, 75.20, 121.78, 114.13, 134.53],
-'Minkowski': [34.27, 38.96, 40.93, 39.14, 41.64, 47.40, 54.00, 57.12, 67.09],
-'TorchSparse++': [17.10, 32.71, 24.42, 22.10, 25.50, 26.59, 28.60, 30.19, 41.06],
-'SPConv': [14.33, 15.87, 17.67, 16.62, 17.40, 19.78, 22.18, 23.38, 30.35],
-'fVDB': [25.36, 27.98, 29.94, 30.79, 31.70, 34.81, 40.41, 44.83, 55.98],
-'Ours (deg.)': [13.11, 14.67, 15.04, 18.45, 15.95, 16.90, 22.80, 23.60, 31.43],
-'Ours': [13.35, 15.35, 15.34, 15.33, 15.72, 24.40, 19.56, 21.24, 28.22]
+    'KPConv': [1252.96, 1317.21, 758.55, 702.52, 670.46, 841.32, 1055.93, 1787.70, 1828.72],
+    'O-CNN': [123.48, 104.05, 75.90, 105.84, 122.55, 75.20, 121.78, 114.13, 134.53],
+    'Minkowski': [34.27, 38.96, 40.93, 39.14, 41.64, 47.40, 54.00, 57.12, 67.09],
+    'TorchSparse++': [17.10, 32.71, 24.42, 22.10, 25.50, 26.59, 28.60, 30.19, 41.06],
+    'SPConv': [14.33, 15.87, 17.67, 16.62, 17.40, 19.78, 22.18, 23.38, 30.35],
+    'fVDB': [25.36, 27.98, 29.94, 30.79, 31.70, 34.81, 40.41, 44.83, 55.98],
+    'Ours (deg.)': [13.11, 14.67, 15.04, 18.45, 15.95, 16.90, 22.80, 23.60, 31.43],
+    'Ours': [13.35, 15.35, 15.34, 15.33, 15.72, 24.40, 19.56, 21.24, 28.22]
 };
 
 const timeBackData = {
-'KPConv': [143.25, 152.65, 170.77, 159.03, 159.65, 182.45, 211.63, 232.65, 301.69],
-'O-CNN': [231.90, 236.90, 164.27, 246.31, 280.13, 165.81, 275.46, 262.50, 317.46],
-'Minkowski': [81.29, 91.95, 99.84, 95.36, 97.23, 109.59, 124.92, 132.54, 162.48],
-'TorchSparse++': [25.41, 35.01, 23.89, 27.01, 30.54, 28.07, 35.05, 35.24, 70.10],
-'SPConv': [53.03, 60.19, 66.41, 61.59, 63.86, 73.62, 86.38, 91.44, 129.40],
-'fVDB': [39.90, 43.91, 47.14, 47.78, 49.06, 55.98, 62.98, 72.41, 90.88],
-'Ours (deg.)': [22.77, 26.71, 25.05, 27.51, 28.11, 28.73, 37.55, 37.45, 49.08],
-'Ours': [22.13, 24.81, 25.24, 24.75, 26.06, 29.68, 32.35, 35.67, 46.14]
+    'KPConv': [143.25, 152.65, 170.77, 159.03, 159.65, 182.45, 211.63, 232.65, 301.69],
+    'O-CNN': [231.90, 236.90, 164.27, 246.31, 280.13, 165.81, 275.46, 262.50, 317.46],
+    'Minkowski': [81.29, 91.95, 99.84, 95.36, 97.23, 109.59, 124.92, 132.54, 162.48],
+    'TorchSparse++': [25.41, 35.01, 23.89, 27.01, 30.54, 28.07, 35.05, 35.24, 70.10],
+    'SPConv': [53.03, 60.19, 66.41, 61.59, 63.86, 73.62, 86.38, 91.44, 129.40],
+    'fVDB': [39.90, 43.91, 47.14, 47.78, 49.06, 55.98, 62.98, 72.41, 90.88],
+    'Ours (deg.)': [22.77, 26.71, 25.05, 27.51, 28.11, 28.73, 37.55, 37.45, 49.08],
+    'Ours': [22.13, 24.81, 25.24, 24.75, 26.06, 29.68, 32.35, 35.67, 46.14]
 };
 
-// 计算每个方法的平均值
+// Calculate averages
 function calculateAverage(data) {
-  const averages = {};
-  for (const method in data) {
-    const values = data[method];
-    averages[method] = values.reduce((sum, val) => sum + val, 0) / values.length;
-  }
-  return averages;
+    const averages = {};
+    for (const method in data) {
+        const values = data[method];
+        averages[method] = values.reduce((sum, val) => sum + val, 0) / values.length;
+    }
+    return averages;
 }
 
-// 计算时间数据的平均值
 const avgTimeInf = calculateAverage(timeInfData);
 const avgTimeBack = calculateAverage(timeBackData);
-
-// 计算内存数据的平均值
 const avgMemInf = calculateAverage(memInfData);
 const avgMemTrain = calculateAverage(memTrainData);
 
-// 准备时间图表数据
-const methods = ['KPConv', 'O-CNN', 'Minkowski', 'TorchSparse++', 'SPConv', 'fVDB', 'Ours (deg.)', 'Ours'];
-const fwdTime = methods.map(method => avgTimeInf[method]);
-const bwdTime = methods.map(method => avgTimeBack[method]);
+// Single convolution layer method names
+const singleMethods = ['KPConv', 'O-CNN', 'Minkowski', 'TorchSparse++', 'SPConv', 'fVDB', 'Ours (deg.)', 'Ours'];
 
-// 创建时间对比图表
-new Chart('timeChart', {
-  type: 'bar',
-  data: {
-    labels: methods,
-    datasets: [
-      {label: 'Inference (ms)', data: fwdTime, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1},
-      {label: 'Training (ms)', data: bwdTime, backgroundColor: '#e74c3c', borderColor: '#c0392b', borderWidth: 1}
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      title: {display: true, text: 'Execution Time Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
-      legend: {position: 'top', labels: {color: '#2c3e50'}}
+// Create single convolution layer charts
+const infMem = singleMethods.map(method => avgMemInf[method]);
+const trainMem = singleMethods.map(method => avgMemTrain[method]);
+const fwdTime = singleMethods.map(method => avgTimeInf[method]);
+const backTime = singleMethods.map(method => avgTimeBack[method]);
+
+// Memory Inference chart
+new Chart('memInf', {
+    type: 'bar',
+    data: {
+        labels: singleMethods,
+        datasets: [{
+            label: 'Memory (GB)',
+            data: infMem,
+            backgroundColor: '#85c1e9',
+            borderColor: '#5dade2',
+            borderWidth: 1
+        }]
     },
-    scales: {
-      y: {
-        type: 'logarithmic',
-        min: 10,
-        max: 10000,
-        title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
-        grid: {color: 'rgba(44,62,80,0.1)'},
-        ticks: {color: '#2c3e50'}
-      },
-      x: {
-        grid: {color: 'rgba(44,62,80,0.05)'},
-        ticks: {color: '#2c3e50'}
-      }
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            title: {display: true, text: 'Memory Usage - Inference', color: '#2c3e50', font: {size: 16, weight: '600'}},
+            legend: {position: 'top', labels: {color: '#2c3e50'}}
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
+                grid: {color: 'rgba(44,62,80,0.1)'},
+                ticks: {color: '#2c3e50'}
+            },
+            x: {
+                grid: {color: 'rgba(44,62,80,0.05)'},
+                ticks: {color: '#2c3e50'}
+            }
+        }
     }
-  }
 });
 
-// 准备内存图表数据
-const infMem = methods.map(method => avgMemInf[method]);
-const trainMem = methods.map(method => avgMemTrain[method]);
-
-// 创建内存对比图表
-new Chart('memChart', {
-  type: 'bar',
-  data: {
-    labels: methods,
-    datasets: [
-      {label: 'Inference (GB)', data: infMem, backgroundColor: '#85c1e9', borderColor: '#5dade2', borderWidth: 1},
-      {label: 'Training (GB)', data: trainMem, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1}
-    ]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      title: {display: true, text: 'Memory Usage Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
-      legend: {position: 'top', labels: {color: '#2c3e50'}}
+// Memory Training chart
+new Chart('memTrain', {
+    type: 'bar',
+    data: {
+        labels: singleMethods,
+        datasets: [{
+            label: 'Memory (GB)',
+            data: trainMem,
+            backgroundColor: '#bdc3c7',
+            borderColor: '#95a5a6',
+            borderWidth: 1
+        }]
     },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
-        grid: {color: 'rgba(44,62,80,0.1)'},
-        ticks: {color: '#2c3e50'}
-      },
-      x: {
-        grid: {color: 'rgba(44,62,80,0.05)'},
-        ticks: {color: '#2c3e50'}
-      }
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            title: {display: true, text: 'Memory Usage - Training', color: '#2c3e50', font: {size: 16, weight: '600'}},
+            legend: {position: 'top', labels: {color: '#2c3e50'}}
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
+                grid: {color: 'rgba(44,62,80,0.1)'},
+                ticks: {color: '#2c3e50'}
+            },
+            x: {
+                grid: {color: 'rgba(44,62,80,0.05)'},
+                ticks: {color: '#2c3e50'}
+            }
+        }
     }
-  }
 });
-</script>
+
+// Time Inference chart
+new Chart('timeInf', {
+    type: 'bar',
+    data: {
+        labels: singleMethods,
+        datasets: [{
+            label: 'Time (ms)',
+            data: fwdTime,
+            backgroundColor: '#f39c12',
+            borderColor: '#e67e22',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            title: {display: true, text: 'Execution Time - Inference', color: '#2c3e50', font: {size: 16, weight: '600'}},
+            legend: {position: 'top', labels: {color: '#2c3e50'}}
+        },
+        scales: {
+            y: {
+                type: 'logarithmic',
+                min: 10,
+                title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
+                grid: {color: 'rgba(44,62,80,0.1)'},
+                ticks: {color: '#2c3e50'}
+            },
+            x: {
+                grid: {color: 'rgba(44,62,80,0.05)'},
+                ticks: {color: '#2c3e50'}
+            }
+        }
+    }
+});
+
+// Time Backward chart
+new Chart('timeBack', {
+    type: 'bar',
+    data: {
+        labels: singleMethods,
+        datasets: [{
+            label: 'Time (ms)',
+            data: backTime,
+            backgroundColor: '#e74c3c',
+            borderColor: '#c0392b',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            title: {display: true, text: 'Execution Time - Backward', color: '#2c3e50', font: {size: 16, weight: '600'}},
+            legend: {position: 'top', labels: {color: '#2c3e50'}}
+        },
+        scales: {
+            y: {
+                type: 'logarithmic',
+                min: 10,
+                title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
+                grid: {color: 'rgba(44,62,80,0.1)'},
+                ticks: {color: '#2c3e50'}
+            },
+            x: {
+                grid: {color: 'rgba(44,62,80,0.05)'},
+                ticks: {color: '#2c3e50'}
+            }
+        }
+    }
+});
+
+// Fade in animation observer
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('fade-in');
+        }
+    });
+});
+
 document.querySelectorAll('section').forEach(el => observer.observe(el));
 </script>
 
