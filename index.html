@@ -817,7 +817,8 @@ const fwdTime = singleMethods.map(method => avgTimeInf[method]);
 const backTime = singleMethods.map(method => avgTimeBack[method]);
 
 // Single convolution - Memory Usage chart (合并 inference 和 training)
-new Chart('memInf', {
+// Single convolution - Memory Usage chart (合并 inference 和 training)
+new Chart('singleMemoryChart', {  // 修改这里：从 'memInf' 改为 'singleMemoryChart'
     type: 'bar',
     data: {
         labels: singleMethods,
@@ -861,7 +862,7 @@ new Chart('memInf', {
 });
 
 // Single convolution - Execution Time chart (合并 inference 和 backward)
-new Chart('memTrain', {
+new Chart('singleTimeChart', {  // 修改这里：从 'memTrain' 改为 'singleTimeChart'
     type: 'bar',
     data: {
         labels: singleMethods,
