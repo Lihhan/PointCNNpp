@@ -476,12 +476,71 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
 
 <!-- Results -->
 <section class="fade-in">
-<div class="results-section">
-<h2>Point Cloud Registration Results</h2>
-<p class="method-description">Comparison on 3DMatch and KITTI datasets</p>
+  <div class="results-section">
+    <h2>Point Cloud Registration Results</h2>
+    <p class="method-description">Comparison on 3DMatch and KITTI datasets</p>
 
-</div>
+    <div class="image-comparison">
+      <div class="image-box">
+        <h3>KITTI Registration Result</h3>
+        <img src="kitti_alignment.gif" alt="KITTI alignment result">
+      </div>
+
+      <div class="image-box">
+        <h3>3DMatch Registration Result</h3>
+        <img src="3dmatch_alignment.gif" alt="3DMatch alignment result">
+      </div>
+    </div>
+  </div>
 </section>
+
+<style>
+/* 淡入效果 */
+.fade-in {
+  animation: fadeIn 1s ease-in-out both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 布局与样式 */
+.results-section {
+  text-align: center;
+  margin: 40px auto;
+  max-width: 1000px;
+}
+
+.method-description {
+  font-size: 1.1em;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.image-comparison {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.image-box {
+  flex: 1 1 45%;
+  text-align: center;
+}
+
+.image-box h3 {
+  margin-bottom: 10px;
+}
+
+.image-box img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+</style>
 
 </div>
 
