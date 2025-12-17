@@ -814,24 +814,33 @@ const trainMem = singleMethods.map(method => avgMemTrain[method]);
 const fwdTime = singleMethods.map(method => avgTimeInf[method]);
 const backTime = singleMethods.map(method => avgTimeBack[method]);
 
-// Memory Inference chart
+// Single convolution - Memory Usage chart (合并 inference 和 training)
 new Chart('memInf', {
     type: 'bar',
     data: {
         labels: singleMethods,
-        datasets: [{
-            label: 'Memory (GB)',
-            data: infMem,
-            backgroundColor: '#85c1e9',
-            borderColor: '#5dade2',
-            borderWidth: 1
-        }]
+        datasets: [
+            {
+                label: 'Inference (GB)',
+                data: infMem,
+                backgroundColor: '#85c1e9',
+                borderColor: '#5dade2',
+                borderWidth: 1
+            },
+            {
+                label: 'Training (GB)',
+                data: trainMem,
+                backgroundColor: '#bdc3c7',
+                borderColor: '#95a5a6',
+                borderWidth: 1
+            }
+        ]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            title: {display: true, text: 'Memory Usage - Inference', color: '#2c3e50', font: {size: 16, weight: '600'}},
+            title: {display: true, text: 'Single Conv Memory Usage Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
             legend: {position: 'top', labels: {color: '#2c3e50'}}
         },
         scales: {
@@ -849,95 +858,33 @@ new Chart('memInf', {
     }
 });
 
-// Memory Training chart
+// Single convolution - Execution Time chart (合并 inference 和 backward)
 new Chart('memTrain', {
     type: 'bar',
     data: {
         labels: singleMethods,
-        datasets: [{
-            label: 'Memory (GB)',
-            data: trainMem,
-            backgroundColor: '#bdc3c7',
-            borderColor: '#95a5a6',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            title: {display: true, text: 'Memory Usage - Training', color: '#2c3e50', font: {size: 16, weight: '600'}},
-            legend: {position: 'top', labels: {color: '#2c3e50'}}
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
-                grid: {color: 'rgba(44,62,80,0.1)'},
-                ticks: {color: '#2c3e50'}
+        datasets: [
+            {
+                label: 'Forward (ms)',
+                data: fwdTime,
+                backgroundColor: '#bdc3c7',
+                borderColor: '#95a5a6',
+                borderWidth: 1
             },
-            x: {
-                grid: {color: 'rgba(44,62,80,0.05)'},
-                ticks: {color: '#2c3e50'}
+            {
+                label: 'Backward (ms)',
+                data: backTime,
+                backgroundColor: '#e74c3c',
+                borderColor: '#c0392b',
+                borderWidth: 1
             }
-        }
-    }
-});
-
-// Time Inference chart
-new Chart('timeInf', {
-    type: 'bar',
-    data: {
-        labels: singleMethods,
-        datasets: [{
-            label: 'Time (ms)',
-            data: fwdTime,
-            backgroundColor: '#f39c12',
-            borderColor: '#e67e22',
-            borderWidth: 1
-        }]
+        ]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            title: {display: true, text: 'Execution Time - Inference', color: '#2c3e50', font: {size: 16, weight: '600'}},
-            legend: {position: 'top', labels: {color: '#2c3e50'}}
-        },
-        scales: {
-            y: {
-                type: 'logarithmic',
-                min: 10,
-                title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
-                grid: {color: 'rgba(44,62,80,0.1)'},
-                ticks: {color: '#2c3e50'}
-            },
-            x: {
-                grid: {color: 'rgba(44,62,80,0.05)'},
-                ticks: {color: '#2c3e50'}
-            }
-        }
-    }
-});
-
-// Time Backward chart
-new Chart('timeBack', {
-    type: 'bar',
-    data: {
-        labels: singleMethods,
-        datasets: [{
-            label: 'Time (ms)',
-            data: backTime,
-            backgroundColor: '#e74c3c',
-            borderColor: '#c0392b',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            title: {display: true, text: 'Execution Time - Backward', color: '#2c3e50', font: {size: 16, weight: '600'}},
+            title: {display: true, text: 'Single Conv Execution Time Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
             legend: {position: 'top', labels: {color: '#2c3e50'}}
         },
         scales: {
