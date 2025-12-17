@@ -1177,61 +1177,8 @@ ticks: {color: '#2c3e50'}
 });
 
 // Single-conv layer data and charts
-const sizes = ['455K','607K','760K','912K','1065K'];
-const colors = {
-'KPConv': '#9b59b6',
-'O-CNN': '#27ae60',
-'Minkowski': '#f39c12',
-'TorchSparse++': '#e74c3c',
-'SPConv': '#34495e',
-'fVDB': '#8e44ad',
-'Ours (deg.)': '#3498db',
-'Ours': '#2c3e50'
-};
-
-function createLineChart(id, title, yTitle, data, logScale = false) {
-new Chart(id, {
-type: 'line',
-data: {
-labels: sizes,
-datasets: Object.keys(data).map(method => ({
-label: method,
-data: data[method],
-borderColor: colors[method],
-backgroundColor: colors[method] + '20',
-tension: 0.25,
-borderWidth: 2.5,
-pointRadius: 4,
-pointHoverRadius: 6,
-fill: false,
-borderDash: method.startsWith('Ours') ? [] : [5, 5]
-}))
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: {
-title: {display: true, text: title, color: '#2c3e50', font: {size: 16, weight: '600'}},
-legend: {position: 'right', labels: {color: '#2c3e50', boxWidth: 12}}
-},
-scales: {
-y: {
-type: logScale ? 'logarithmic' : 'linear',
-title: {display: true, text: yTitle, color: '#2c3e50'},
-grid: {color: 'rgba(44,62,80,0.1)'},
-ticks: {color: '#2c3e50'}
-},
-x: {
-title: {display: true, text: 'Input Size (Points/Voxels)', color: '#2c3e50'},
-grid: {color: 'rgba(44,62,80,0.05)'},
-ticks: {color: '#2c3e50'}
-}
-}
-}
-});
-}
-
-// Single convolution performance data (same as original)
+<script>
+// 数据定义
 const memInfData = {
 'KPConv': [16.83, 17.10, 19.81, 18.11, 18.28, 20.30, 24.23, 26.78, 34.02],
 'O-CNN': [3.79, 3.93, 3.09, 3.93, 4.35, 3.07, 4.27, 4.12, 4.83],
@@ -1276,21 +1223,99 @@ const timeBackData = {
 'Ours': [22.13, 24.81, 25.24, 24.75, 26.06, 29.68, 32.35, 35.67, 46.14]
 };
 
-createLineChart('memInf', 'Inference Memory Usage', 'Memory (GB)', memInfData, false);
-createLineChart('memTrain', 'Training Memory Usage', 'Memory (GB)', memTrainData, false);
-createLineChart('timeInf', 'Inference Time', 'Time (ms)', timeInfData, true);
-createLineChart('timeBack', 'Training Time', 'Time (ms)', timeBackData, true);
-
-// Add fade-in animation on scroll
-const observer = new IntersectionObserver((entries) => {
-entries.forEach(entry => {
-if (entry.isIntersecting) {
-entry.target.style.animationDelay = '0.2s';
-entry.target.classList.add('fade-in');
+// 计算每个方法的平均值
+function calculateAverage(data) {
+  const averages = {};
+  for (const method in data) {
+    const values = data[method];
+    averages[method] = values.reduce((sum, val) => sum + val, 0) / values.length;
+  }
+  return averages;
 }
-});
-}, {threshold: 0.1});
 
+// 计算时间数据的平均值
+const avgTimeInf = calculateAverage(timeInfData);
+const avgTimeBack = calculateAverage(timeBackData);
+
+// 计算内存数据的平均值
+const avgMemInf = calculateAverage(memInfData);
+const avgMemTrain = calculateAverage(memTrainData);
+
+// 准备时间图表数据
+const methods = ['KPConv', 'O-CNN', 'Minkowski', 'TorchSparse++', 'SPConv', 'fVDB', 'Ours (deg.)', 'Ours'];
+const fwdTime = methods.map(method => avgTimeInf[method]);
+const bwdTime = methods.map(method => avgTimeBack[method]);
+
+// 创建时间对比图表
+new Chart('timeChart', {
+  type: 'bar',
+  data: {
+    labels: methods,
+    datasets: [
+      {label: 'Inference (ms)', data: fwdTime, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1},
+      {label: 'Training (ms)', data: bwdTime, backgroundColor: '#e74c3c', borderColor: '#c0392b', borderWidth: 1}
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {display: true, text: 'Execution Time Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
+      legend: {position: 'top', labels: {color: '#2c3e50'}}
+    },
+    scales: {
+      y: {
+        type: 'logarithmic',
+        min: 10,
+        max: 10000,
+        title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
+        grid: {color: 'rgba(44,62,80,0.1)'},
+        ticks: {color: '#2c3e50'}
+      },
+      x: {
+        grid: {color: 'rgba(44,62,80,0.05)'},
+        ticks: {color: '#2c3e50'}
+      }
+    }
+  }
+});
+
+// 准备内存图表数据
+const infMem = methods.map(method => avgMemInf[method]);
+const trainMem = methods.map(method => avgMemTrain[method]);
+
+// 创建内存对比图表
+new Chart('memChart', {
+  type: 'bar',
+  data: {
+    labels: methods,
+    datasets: [
+      {label: 'Inference (GB)', data: infMem, backgroundColor: '#85c1e9', borderColor: '#5dade2', borderWidth: 1},
+      {label: 'Training (GB)', data: trainMem, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1}
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      title: {display: true, text: 'Memory Usage Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
+      legend: {position: 'top', labels: {color: '#2c3e50'}}
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
+        grid: {color: 'rgba(44,62,80,0.1)'},
+        ticks: {color: '#2c3e50'}
+      },
+      x: {
+        grid: {color: 'rgba(44,62,80,0.05)'},
+        ticks: {color: '#2c3e50'}
+      }
+    }
+  }
+});
+</script>
 document.querySelectorAll('section').forEach(el => observer.observe(el));
 </script>
 
