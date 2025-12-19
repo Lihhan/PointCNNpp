@@ -458,250 +458,41 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
     Execution time and memory usage measured on S3DIS dataset
 </div>
 
+<!-- ResNet-18 原来的2个柱状图 -->
 <div id="resnetCharts">
-    <div class="charts">
+    <div class="charts-resnet">
         <div class="chart-container">
-            <div class="chart-title">Inference Mode</div>
-            <canvas id="inferenceMemoryChart"></canvas>
+            <div class="chart-title">ResNet-18 Execution Time Comparison</div>
+            <canvas id="timeChart"></canvas>
         </div>
         <div class="chart-container">
-            <div class="chart-title">Training Mode (i.e., with Back-Propagation)</div>
-            <canvas id="trainingMemoryChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <div class="chart-title">Inference Mode</div>
-            <canvas id="inferenceTimeChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <div class="chart-title">Back-Propagation Part in Training Mode</div>
-            <canvas id="trainingTimeChart"></canvas>
+            <div class="chart-title">ResNet-18 Memory Usage Comparison</div>
+            <canvas id="memChart"></canvas>
         </div>
     </div>
 </div>
 
+<!-- Single Convolution的4张图 -->
 <div id="singleCharts" style="display:none">
     <div class="charts">
         <div class="chart-container">
-            <div class="chart-title">Single Conv - Memory Usage</div>
-            <canvas id="singleMemoryChart"></canvas>
+            <div class="chart-title">Inference Mode - Memory Usage</div>
+            <canvas id="singleMemInf"></canvas>
         </div>
         <div class="chart-container">
-            <div class="chart-title">Single Conv - Time</div>
-            <canvas id="singleTimeChart"></canvas>
+            <div class="chart-title">Training Mode - Memory Usage</div>
+            <canvas id="singleMemTrain"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Inference Mode - Time</div>
+            <canvas id="singleTimeInf"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Back-Propagation Part - Time</div>
+            <canvas id="singleTimeBack"></canvas>
         </div>
     </div>
 </div>
-
-<script>
-// JSON数据和图表逻辑
-const benchmarkData = {
-    // ... 您提供的JSON数据 ...
-};
-
-// 框架配置
-const frameworkConfig = {
-    'kpconv': { name: 'KPConv', color: '#8B5CF6', solid: false },
-    'ocnn': { name: 'O-CNN', color: '#10B981', solid: false },
-    'fvdb': { name: 'fVDB', color: '#F59E0B', solid: false },
-    'minkowski': { name: 'MinkowskiEngine', color: '#3B82F6', solid: false },
-    'spconv': { name: 'SPConv', color: '#8B5A2B', solid: false },
-    'torchsparse': { name: 'TorchSparse++', color: '#FF6B35', solid: false },
-    'pointops_degraded': { name: 'Ours(degraded)', color: '#06B6D4', solid: true },
-    'pointops_normal': { name: 'Ours', color: '#DC2626', solid: true }
-};
-
-// 数据提取函数
-function extractData() {
-    const results = benchmarkData.results;
-    const inputSizes = results.map(r => Math.round(r.minkowski.input_size / 1000) + 'K');
-    
-    const datasets = {};
-    
-    Object.keys(frameworkConfig).forEach(framework => {
-        datasets[framework] = {
-            forward_memory: results.map(r => r[framework].forward_memory_gb),
-            backward_memory: results.map(r => r[framework].backward_memory_gb || r[framework].memory_gb),
-            forward_time: results.map(r => r[framework].forward_ms),
-            backward_time: results.map(r => r[framework].backward_ms || 0)
-        };
-    });
-    
-    return { inputSizes, datasets };
-}
-
-// 创建图表函数
-function createChart(ctx, data, yAxisType, yAxisLabel) {
-    const { inputSizes, datasets } = extractData();
-    
-    const chartDatasets = Object.keys(frameworkConfig).map(framework => {
-        const config = frameworkConfig[framework];
-        return {
-            label: config.name,
-            data: data[framework],
-            borderColor: config.color,
-            backgroundColor: config.color + '20',
-            borderWidth: config.solid ? 3 : 2,
-            borderDash: config.solid ? [] : [5, 5],
-            pointStyle: config.solid ? 'circle' : 'triangle',
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            fill: false,
-            tension: 0.1
-        };
-    });
-
-    return new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: inputSizes,
-            datasets: chartDatasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    type: yAxisType,
-                    title: {
-                        display: true,
-                        text: yAxisLabel
-                    },
-                    grid: {
-                        display: true,
-                        color: '#f0f0f0'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Input Size (Points/Voxels)'
-                    },
-                    grid: {
-                        display: true,
-                        color: '#f0f0f0'
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'right',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 10
-                    },
-                    onClick: function(e, legendItem, legend) {
-                        const index = legendItem.datasetIndex;
-                        const chart = legend.chart;
-                        const meta = chart.getDatasetMeta(index);
-                        
-                        // 切换显示/隐藏
-                        meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
-                        chart.update();
-                    }
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                }
-            },
-            interaction: {
-                mode: 'nearest',
-                axis: 'x',
-                intersect: false
-            }
-        }
-    });
-}
-
-// 初始化图表
-function initBenchmarkCharts() {
-    const { inputSizes, datasets } = extractData();
-    
-    // ResNet charts (使用single convolution数据模拟)
-    if (document.getElementById('inferenceMemoryChart')) {
-        createChart(
-            document.getElementById('inferenceMemoryChart').getContext('2d'),
-            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].forward_memory])),
-            'logarithmic',
-            'Memory Usage (GB)'
-        );
-    }
-    
-    if (document.getElementById('trainingMemoryChart')) {
-        createChart(
-            document.getElementById('trainingMemoryChart').getContext('2d'),
-            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].backward_memory])),
-            'logarithmic',
-            'Memory Usage (GB)'
-        );
-    }
-    
-    if (document.getElementById('inferenceTimeChart')) {
-        createChart(
-            document.getElementById('inferenceTimeChart').getContext('2d'),
-            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].forward_time])),
-            'logarithmic',
-            'Time (ms)'
-        );
-    }
-    
-    if (document.getElementById('trainingTimeChart')) {
-        createChart(
-            document.getElementById('trainingTimeChart').getContext('2d'),
-            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].backward_time])),
-            'logarithmic',
-            'Time (ms)'
-        );
-    }
-    
-    // Single convolution charts
-    if (document.getElementById('singleMemoryChart')) {
-        createChart(
-            document.getElementById('singleMemoryChart').getContext('2d'),
-            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].backward_memory])),
-            'logarithmic',
-            'Memory Usage (GB)'
-        );
-    }
-    
-    if (document.getElementById('singleTimeChart')) {
-        createChart(
-            document.getElementById('singleTimeChart').getContext('2d'),
-            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].forward_time.map((f, i) => f + datasets[k].backward_time[i])])),
-            'logarithmic',
-            'Time (ms)'
-        );
-    }
-}
-
-// 按钮切换功能
-document.addEventListener('DOMContentLoaded', function() {
-    const btnRes = document.getElementById('btnRes');
-    const btnSingle = document.getElementById('btnSingle');
-    const resnetCharts = document.getElementById('resnetCharts');
-    const singleCharts = document.getElementById('singleCharts');
-    
-    if (btnRes && btnSingle && resnetCharts && singleCharts) {
-        btnRes.addEventListener('click', function() {
-            this.classList.add('active');
-            btnSingle.classList.remove('active');
-            resnetCharts.style.display = 'block';
-            singleCharts.style.display = 'none';
-        });
-
-        btnSingle.addEventListener('click', function() {
-            this.classList.add('active');
-            btnRes.classList.remove('active');
-            resnetCharts.style.display = 'none';
-            singleCharts.style.display = 'block';
-        });
-    }
-    
-    // 初始化图表
-    initBenchmarkCharts();
-});
-</script>
 
 <style>
 .toggle {
@@ -726,9 +517,19 @@ document.addEventListener('DOMContentLoaded', function() {
     color: white;
 }
 
+/* ResNet图表布局 - 2个图横向排列 */
+.charts-resnet {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 20px 0;
+}
+
+/* Single图表布局 - 4个图2x2排列 */
 .charts {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     gap: 30px;
     margin: 20px 0;
 }
@@ -750,18 +551,6 @@ document.addEventListener('DOMContentLoaded', function() {
     color: #333;
 }
 
-#resnetCharts .charts {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
-
-#singleCharts .charts {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
-}
-</style>
-
-<style>
 /* 淡入效果 */
 .fade-in {
   animation: fadeIn 1s ease-in-out both;
@@ -770,42 +559,6 @@ document.addEventListener('DOMContentLoaded', function() {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* 布局与样式 */
-.results-section {
-  text-align: center;
-  margin: 40px auto;
-  max-width: 1000px;
-}
-
-.method-description {
-  font-size: 1.1em;
-  color: #555;
-  margin-bottom: 20px;
-}
-
-.image-comparison {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.image-box {
-  flex: 1 1 45%;
-  text-align: center;
-}
-
-.image-box h3 {
-  margin-bottom: 10px;
-}
-
-.image-box img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 </style>
 
@@ -816,421 +569,218 @@ document.addEventListener('DOMContentLoaded', function() {
 Chart.defaults.color = '#2c3e50';
 Chart.defaults.borderColor = 'rgba(44,62,80,0.1)';
 
-// 3D Kernel Visualization
-function draw3DKernel(canvas) {
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
-    ctx.scale(dpr, dpr);
+// Toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const btnRes = document.getElementById('btnRes');
+    const btnSingle = document.getElementById('btnSingle');
+    const resDiv = document.getElementById('resnetCharts');
+    const singleDiv = document.getElementById('singleCharts');
 
-    const w = rect.width, h = rect.height;
-    let frame = 0;
+    if (btnRes && btnSingle && resDiv && singleDiv) {
+        btnRes.onclick = () => {
+            btnRes.classList.add('active');
+            btnSingle.classList.remove('active');
+            resDiv.style.display = 'block';
+            singleDiv.style.display = 'none';
+        };
 
-    function drawKernel() {
-        ctx.clearRect(0, 0, w, h);
-        
-        // Draw title
-        ctx.fillStyle = '#2c3e50';
-        ctx.font = 'bold 14px "Segoe UI", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('3×3×3 Convolution Kernel', w/2, 25);
+        btnSingle.onclick = () => {
+            btnSingle.classList.add('active');
+            btnRes.classList.remove('active');
+            resDiv.style.display = 'none';
+            singleDiv.style.display = 'block';
+        };
+    }
 
-        // 3D isometric projection
-        const centerX = w/2;
-        const centerY = h/2 + 20;
-        const cubeSize = 18;
-        const spacing = 20;
-        
-        // Rotation angle for 3D effect
-        const angle = frame * 0.01;
-        const cosA = Math.cos(angle);
-        const sinA = Math.sin(angle);
-        
-        // Draw 27 cubes in 3×3×3 arrangement
-        const cubes = [];
-        
-        for(let z = 0; z < 3; z++) {
-            for(let y = 0; y < 3; y++) {
-                for(let x = 0; x < 3; x++) {
-                    // 3D coordinates
-                    const x3d = (x - 1) * spacing;
-                    const y3d = (y - 1) * spacing;
-                    const z3d = (z - 1) * spacing;
-                    
-                    // Rotate around Y axis
-                    const rotatedX = x3d * cosA - z3d * sinA;
-                    const rotatedZ = x3d * sinA + z3d * cosA;
-                    
-                    // Isometric projection
-                    const isoX = centerX + (rotatedX - y3d) * 0.866;
-                    const isoY = centerY + (rotatedX + y3d) * 0.5 - rotatedZ * 0.7;
-                    
-                    const isCenter = (x === 1 && y === 1 && z === 1);
-                    
-                    cubes.push({
-                        x: isoX,
-                        y: isoY,
-                        z: rotatedZ,
-                        isCenter: isCenter,
-                        originalPos: {x, y, z}
-                    });
+    // Initialize charts after DOM is loaded
+    initializeAllCharts();
+});
+
+function initializeAllCharts() {
+    // ===== ResNet-18 backbone charts (原来的2个柱状图) =====
+    const resnetMethods = ['KPConv','O-CNN','MinkowskiEng.','TorchSparse++','SPConv','fVDB','Ours (deg.)','Ours'];
+    const fwd = [3316.6,199.3,78.3,83.7,62.8,49.6,60.4,51.5];
+    const bwd = [6331.1,351.1,212.3,152.1,133.9,105.6,71.5,67.0];
+
+    // ResNet time chart
+    if (document.getElementById('timeChart')) {
+        new Chart('timeChart', {
+            type: 'bar',
+            data: {
+                labels: resnetMethods,
+                datasets: [
+                    {label: 'Forward (ms)', data: fwd, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1},
+                    {label: 'Backward (ms)', data: bwd, backgroundColor: '#e74c3c', borderColor: '#c0392b', borderWidth: 1}
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {position: 'top', labels: {color: '#2c3e50'}}
+                },
+                scales: {
+                    y: {
+                        type: 'logarithmic',
+                        min: 10,
+                        max: 10000,
+                        title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
+                        grid: {color: 'rgba(44,62,80,0.1)'},
+                        ticks: {color: '#2c3e50'}
+                    },
+                    x: {
+                        grid: {color: 'rgba(44,62,80,0.05)'},
+                        ticks: {color: '#2c3e50'}
+                    }
                 }
             }
-        }
-        
-        // Sort by z-order for proper 3D rendering
-        cubes.sort((a, b) => a.z - b.z);
-        
-        // Draw cubes
-        cubes.forEach(cube => {
-            const size = cubeSize;
-            
-            // Draw cube faces for 3D effect
-            if(cube.isCenter) {
-                // Center cube - highlight in accent color
-                ctx.fillStyle = '#3498db';
-            } else {
-                // Regular weight positions
-                ctx.fillStyle = '#667eea';
-            }
-            
-            // Main face
-            ctx.fillRect(cube.x - size/2, cube.y - size/2, size, size);
-            
-            // Top face (lighter)
-            ctx.fillStyle = cube.isCenter ? '#5dade2' : '#8a9fec';
-            const topPoints = [
-                [cube.x - size/2, cube.y - size/2],
-                [cube.x + size/2, cube.y - size/2],
-                [cube.x + size/2 + 4, cube.y - size/2 - 4],
-                [cube.x - size/2 + 4, cube.y - size/2 - 4]
-            ];
-            
-            ctx.beginPath();
-            ctx.moveTo(...topPoints[0]);
-            topPoints.slice(1).forEach(point => ctx.lineTo(...point));
-            ctx.closePath();
-            ctx.fill();
-            
-            // Right face (darker)
-            ctx.fillStyle = cube.isCenter ? '#2980b9' : '#5a6fd8';
-            const rightPoints = [
-                [cube.x + size/2, cube.y - size/2],
-                [cube.x + size/2, cube.y + size/2],
-                [cube.x + size/2 + 4, cube.y + size/2 - 4],
-                [cube.x + size/2 + 4, cube.y - size/2 - 4]
-            ];
-            
-            ctx.beginPath();
-            ctx.moveTo(...rightPoints[0]);
-            rightPoints.slice(1).forEach(point => ctx.lineTo(...point));
-            ctx.closePath();
-            ctx.fill();
-            
-            // Outline
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(cube.x - size/2, cube.y - size/2, size, size);
-            
-            // Position label for some cubes
-            if(Math.abs(cube.z) < 10 && !cube.isCenter) {
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '8px "Segoe UI", sans-serif';
-                ctx.textAlign = 'center';
-                const relX = cube.originalPos.x - 1;
-                const relY = cube.originalPos.y - 1;
-                const relZ = cube.originalPos.z - 1;
-                ctx.fillText(`${relX},${relY},${relZ}`, cube.x, cube.y + 2);
-            }
-            
-            if(cube.isCenter) {
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 8px "Segoe UI", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('CENTER', cube.x, cube.y + 2);
+        });
+    }
+
+    // ResNet memory chart
+    const memLabels = ['O-CNN','KPConv','TorchSparse++','SPConv','MinkowskiEng.','fVDB','Ours (deg.)','Ours'];
+    const infM = [10.93,4.64,3.08,2.64,1.20,0.72,0.38,0.37];
+    const backM = [11.61,8.24,3.08,2.64,1.20,1.79,0.59,0.55];
+
+    if (document.getElementById('memChart')) {
+        new Chart('memChart', {
+            type: 'bar',
+            data: {
+                labels: memLabels,
+                datasets: [
+                    {label: 'Inference (GB)', data: infM, backgroundColor: '#85c1e9', borderColor: '#5dade2', borderWidth: 1},
+                    {label: 'Training (GB)', data: backM, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1}
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {position: 'top', labels: {color: '#2c3e50'}}
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
+                        grid: {color: 'rgba(44,62,80,0.1)'},
+                        ticks: {color: '#2c3e50'}
+                    },
+                    x: {
+                        grid: {color: 'rgba(44,62,80,0.05)'},
+                        ticks: {color: '#2c3e50'}
+                    }
+                }
             }
         });
-        
-        // Legend
-        ctx.fillStyle = '#2c3e50';
-        ctx.font = '11px "Segoe UI", sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText('Blue: Center position (no weight)', 20, h - 30);
-        ctx.fillText('Purple: 26 weight positions', 20, h - 15);
-        
-        frame++;
-        requestAnimationFrame(drawKernel);
     }
 
-    drawKernel();
+    // ===== Single convolution layer charts (4张图) =====
+    const singleMethods = ['KPConv', 'O-CNN', 'Minkowski', 'TorchSparse++', 'SPConv', 'fVDB', 'Ours (deg.)', 'Ours'];
+    const singleColors = ['#8B5CF6','#10B981','#3B82F6','#FF6B35','#8B5A2B','#F59E0B','#06B6D4','#DC2626'];
+    
+    // 平均数据
+    const avgMemInf = [12.71, 3.83, 2.24, 1.39, 3.94, 2.59, 1.19, 1.16];
+    const avgMemTrain = [19.15, 4.67, 2.87, 1.89, 6.47, 3.22, 1.20, 1.17];
+    const avgTimeInf = [896.49, 112.13, 46.70, 26.25, 19.75, 34.64, 17.35, 18.06];
+    const avgTimeBack = [168.69, 241.28, 116.55, 34.54, 74.40, 54.45, 31.17, 29.65];
+
+    // Single Memory Inference
+    if (document.getElementById('singleMemInf')) {
+        new Chart('singleMemInf', {
+            type: 'bar',
+            data: {
+                labels: singleMethods,
+                datasets: [{
+                    label: 'Memory (GB)',
+                    data: avgMemInf,
+                    backgroundColor: singleColors.map(c => c + '80'),
+                    borderColor: singleColors,
+                    borderWidth: 2
+                }]
+            },
+            options: getChartOptions('Memory (GB)', false)
+        });
+    }
+
+    // Single Memory Training
+    if (document.getElementById('singleMemTrain')) {
+        new Chart('singleMemTrain', {
+            type: 'bar',
+            data: {
+                labels: singleMethods,
+                datasets: [{
+                    label: 'Memory (GB)',
+                    data: avgMemTrain,
+                    backgroundColor: singleColors.map(c => c + '80'),
+                    borderColor: singleColors,
+                    borderWidth: 2
+                }]
+            },
+            options: getChartOptions('Memory (GB)', false)
+        });
+    }
+
+    // Single Time Inference
+    if (document.getElementById('singleTimeInf')) {
+        new Chart('singleTimeInf', {
+            type: 'bar',
+            data: {
+                labels: singleMethods,
+                datasets: [{
+                    label: 'Time (ms)',
+                    data: avgTimeInf,
+                    backgroundColor: singleColors.map(c => c + '80'),
+                    borderColor: singleColors,
+                    borderWidth: 2
+                }]
+            },
+            options: getChartOptions('Time (ms)', true)
+        });
+    }
+
+    // Single Time Backward
+    if (document.getElementById('singleTimeBack')) {
+        new Chart('singleTimeBack', {
+            type: 'bar',
+            data: {
+                labels: singleMethods,
+                datasets: [{
+                    label: 'Time (ms)',
+                    data: avgTimeBack,
+                    backgroundColor: singleColors.map(c => c + '80'),
+                    borderColor: singleColors,
+                    borderWidth: 2
+                }]
+            },
+            options: getChartOptions('Time (ms)', true)
+        });
+    }
 }
 
-// Initialize visualizations
-setTimeout(() => {
-    const kernel3D = document.getElementById('kernel3D');
-    if (kernel3D) draw3DKernel(kernel3D);
-}, 100);
-
-// Toggle functionality
-const btnRes = document.getElementById('btnRes');
-const btnSingle = document.getElementById('btnSingle');
-const resDiv = document.getElementById('resnetCharts');
-const singleDiv = document.getElementById('singleCharts');
-
-if (btnRes && btnSingle && resDiv && singleDiv) {
-    btnRes.onclick = () => {
-        btnRes.classList.add('active');
-        btnSingle.classList.remove('active');
-        resDiv.style.display = 'block';
-        singleDiv.style.display = 'none';
+// 通用图表配置函数
+function getChartOptions(yLabel, isLogarithmic) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {display: false}
+        },
+        scales: {
+            y: {
+                type: isLogarithmic ? 'logarithmic' : 'linear',
+                beginAtZero: !isLogarithmic,
+                min: isLogarithmic ? 10 : undefined,
+                title: {display: true, text: yLabel, color: '#2c3e50'},
+                grid: {color: 'rgba(44,62,80,0.1)'},
+                ticks: {color: '#2c3e50'}
+            },
+            x: {
+                grid: {color: 'rgba(44,62,80,0.05)'},
+                ticks: {color: '#2c3e50', maxRotation: 45}
+            }
+        }
     };
-
-    btnSingle.onclick = () => {
-        btnSingle.classList.add('active');
-        btnRes.classList.remove('active');
-        resDiv.style.display = 'none';
-        singleDiv.style.display = 'block';
-    };
 }
-
-// ResNet-18 backbone charts data
-const resnetMethods = ['KPConv','O-CNN','MinkowskiEng.','TorchSparse++','SPConv','fVDB','Ours (deg.)','Ours'];
-const fwd = [3316.6,199.3,78.3,83.7,62.8,49.6,60.4,51.5];
-const bwd = [6331.1,351.1,212.3,152.1,133.9,105.6,71.5,67.0];
-
-// ResNet time chart
-new Chart('timeChart', {
-    type: 'bar',
-    data: {
-        labels: resnetMethods,
-        datasets: [
-            {label: 'Forward (ms)', data: fwd, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1},
-            {label: 'Backward (ms)', data: bwd, backgroundColor: '#e74c3c', borderColor: '#c0392b', borderWidth: 1}
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            title: {display: true, text: 'ResNet-18 Execution Time Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
-            legend: {position: 'top', labels: {color: '#2c3e50'}}
-        },
-        scales: {
-            y: {
-                type: 'logarithmic',
-                min: 10,
-                max: 10000,
-                title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
-                grid: {color: 'rgba(44,62,80,0.1)'},
-                ticks: {color: '#2c3e50'}
-            },
-            x: {
-                grid: {color: 'rgba(44,62,80,0.05)'},
-                ticks: {color: '#2c3e50'}
-            }
-        }
-    }
-});
-
-// ResNet memory chart
-const memLabels = ['O-CNN','KPConv','TorchSparse++','SPConv','MinkowskiEng.','fVDB','Ours (deg.)','Ours'];
-const infM = [10.93,4.64,3.08,2.64,1.20,0.72,0.38,0.37];
-const backM = [11.61,8.24,3.08,2.64,1.20,1.79,0.59,0.55];
-
-new Chart('memChart', {
-    type: 'bar',
-    data: {
-        labels: memLabels,
-        datasets: [
-            {label: 'Inference (GB)', data: infM, backgroundColor: '#85c1e9', borderColor: '#5dade2', borderWidth: 1},
-            {label: 'Training (GB)', data: backM, backgroundColor: '#bdc3c7', borderColor: '#95a5a6', borderWidth: 1}
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            title: {display: true, text: 'ResNet-18 Memory Usage Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
-            legend: {position: 'top', labels: {color: '#2c3e50'}}
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
-                grid: {color: 'rgba(44,62,80,0.1)'},
-                ticks: {color: '#2c3e50'}
-            },
-            x: {
-                grid: {color: 'rgba(44,62,80,0.05)'},
-                ticks: {color: '#2c3e50'}
-            }
-        }
-    }
-});
-
-// Single convolution layer data
-const memInfData = {
-    'KPConv': [16.83, 17.10, 19.81, 18.11, 18.28, 20.30, 24.23, 26.78, 34.02],
-    'O-CNN': [3.79, 3.93, 3.09, 3.93, 4.35, 3.07, 4.27, 4.12, 4.83],
-    'Minkowski': [1.63, 1.85, 1.97, 1.96, 2.04, 2.31, 2.68, 2.97, 3.75],
-    'TorchSparse++': [1.03, 1.15, 1.18, 1.19, 1.23, 1.44, 1.65, 1.79, 2.48],
-    'SPConv': [2.86, 3.20, 3.35, 3.45, 3.57, 4.06, 4.69, 5.27, 6.63],
-    'fVDB': [1.85, 2.06, 2.15, 2.23, 2.30, 2.61, 3.01, 3.38, 4.26],
-    'Ours (deg.)': [0.83, 0.94, 0.99, 1.00, 1.03, 1.16, 1.36, 1.49, 1.89],
-    'Ours': [0.81, 0.91, 0.97, 0.97, 1.00, 1.13, 1.32, 1.46, 1.84]
-};
-
-const memTrainData = {
-    'KPConv': [16.83, 17.10, 19.81, 18.11, 18.28, 20.30, 24.23, 26.78, 34.02],
-    'O-CNN': [4.60, 4.76, 3.68, 4.76, 5.25, 3.67, 5.13, 4.94, 5.79],
-    'Minkowski': [2.07, 2.35, 2.49, 2.49, 2.58, 2.93, 3.41, 3.77, 4.77],
-    'TorchSparse++': [1.40, 1.51, 1.50, 1.51, 1.58, 1.90, 2.35, 2.28, 3.42],
-    'SPConv': [4.69, 5.25, 5.48, 5.65, 5.86, 6.65, 7.69, 8.64, 10.88],
-    'fVDB': [2.30, 2.57, 2.70, 2.76, 2.85, 3.23, 3.75, 4.18, 5.28],
-    'Ours (deg.)': [0.84, 0.94, 0.99, 1.00, 1.04, 1.17, 1.36, 1.50, 1.90],
-    'Ours': [0.81, 0.92, 0.97, 0.97, 1.01, 1.14, 1.32, 1.47, 1.85]
-};
-
-const timeInfData = {
-    'KPConv': [1252.96, 1317.21, 758.55, 702.52, 670.46, 841.32, 1055.93, 1787.70, 1828.72],
-    'O-CNN': [123.48, 104.05, 75.90, 105.84, 122.55, 75.20, 121.78, 114.13, 134.53],
-    'Minkowski': [34.27, 38.96, 40.93, 39.14, 41.64, 47.40, 54.00, 57.12, 67.09],
-    'TorchSparse++': [17.10, 32.71, 24.42, 22.10, 25.50, 26.59, 28.60, 30.19, 41.06],
-    'SPConv': [14.33, 15.87, 17.67, 16.62, 17.40, 19.78, 22.18, 23.38, 30.35],
-    'fVDB': [25.36, 27.98, 29.94, 30.79, 31.70, 34.81, 40.41, 44.83, 55.98],
-    'Ours (deg.)': [13.11, 14.67, 15.04, 18.45, 15.95, 16.90, 22.80, 23.60, 31.43],
-    'Ours': [13.35, 15.35, 15.34, 15.33, 15.72, 24.40, 19.56, 21.24, 28.22]
-};
-
-const timeBackData = {
-    'KPConv': [143.25, 152.65, 170.77, 159.03, 159.65, 182.45, 211.63, 232.65, 301.69],
-    'O-CNN': [231.90, 236.90, 164.27, 246.31, 280.13, 165.81, 275.46, 262.50, 317.46],
-    'Minkowski': [81.29, 91.95, 99.84, 95.36, 97.23, 109.59, 124.92, 132.54, 162.48],
-    'TorchSparse++': [25.41, 35.01, 23.89, 27.01, 30.54, 28.07, 35.05, 35.24, 70.10],
-    'SPConv': [53.03, 60.19, 66.41, 61.59, 63.86, 73.62, 86.38, 91.44, 129.40],
-    'fVDB': [39.90, 43.91, 47.14, 47.78, 49.06, 55.98, 62.98, 72.41, 90.88],
-    'Ours (deg.)': [22.77, 26.71, 25.05, 27.51, 28.11, 28.73, 37.55, 37.45, 49.08],
-    'Ours': [22.13, 24.81, 25.24, 24.75, 26.06, 29.68, 32.35, 35.67, 46.14]
-};
-
-// Calculate averages
-function calculateAverage(data) {
-    const averages = {};
-    for (const method in data) {
-        const values = data[method];
-        averages[method] = values.reduce((sum, val) => sum + val, 0) / values.length;
-    }
-    return averages;
-}
-
-const avgTimeInf = calculateAverage(timeInfData);
-const avgTimeBack = calculateAverage(timeBackData);
-const avgMemInf = calculateAverage(memInfData);
-const avgMemTrain = calculateAverage(memTrainData);
-
-// Single convolution layer method names
-const singleMethods = ['KPConv', 'O-CNN', 'Minkowski', 'TorchSparse++', 'SPConv', 'fVDB', 'Ours (deg.)', 'Ours'];
-
-// Create single convolution layer charts
-const infMem = singleMethods.map(method => avgMemInf[method]);
-const trainMem = singleMethods.map(method => avgMemTrain[method]);
-const fwdTime = singleMethods.map(method => avgTimeInf[method]);
-const backTime = singleMethods.map(method => avgTimeBack[method]);
-
-// Single convolution - Memory Usage chart (合并 inference 和 training)
-// Single convolution - Memory Usage chart (合并 inference 和 training)
-new Chart('singleMemoryChart', {  // 修改这里：从 'memInf' 改为 'singleMemoryChart'
-    type: 'bar',
-    data: {
-        labels: singleMethods,
-        datasets: [
-            {
-                label: 'Inference (GB)',
-                data: infMem,
-                backgroundColor: '#85c1e9',
-                borderColor: '#5dade2',
-                borderWidth: 1
-            },
-            {
-                label: 'Training (GB)',
-                data: trainMem,
-                backgroundColor: '#bdc3c7',
-                borderColor: '#95a5a6',
-                borderWidth: 1
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            title: {display: true, text: 'Single Conv Memory Usage Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
-            legend: {position: 'top', labels: {color: '#2c3e50'}}
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {display: true, text: 'Peak Memory (GB)', color: '#2c3e50'},
-                grid: {color: 'rgba(44,62,80,0.1)'},
-                ticks: {color: '#2c3e50'}
-            },
-            x: {
-                grid: {color: 'rgba(44,62,80,0.05)'},
-                ticks: {color: '#2c3e50'}
-            }
-        }
-    }
-});
-
-// Single convolution - Execution Time chart (合并 inference 和 backward)
-new Chart('singleTimeChart', {  // 修改这里：从 'memTrain' 改为 'singleTimeChart'
-    type: 'bar',
-    data: {
-        labels: singleMethods,
-        datasets: [
-            {
-                label: 'Forward (ms)',
-                data: fwdTime,
-                backgroundColor: '#bdc3c7',
-                borderColor: '#95a5a6',
-                borderWidth: 1
-            },
-            {
-                label: 'Backward (ms)',
-                data: backTime,
-                backgroundColor: '#e74c3c',
-                borderColor: '#c0392b',
-                borderWidth: 1
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            title: {display: true, text: 'Single Conv Execution Time Comparison', color: '#2c3e50', font: {size: 16, weight: '600'}},
-            legend: {position: 'top', labels: {color: '#2c3e50'}}
-        },
-        scales: {
-            y: {
-                type: 'logarithmic',
-                min: 10,
-                title: {display: true, text: 'Time (ms)', color: '#2c3e50'},
-                grid: {color: 'rgba(44,62,80,0.1)'},
-                ticks: {color: '#2c3e50'}
-            },
-            x: {
-                grid: {color: 'rgba(44,62,80,0.05)'},
-                ticks: {color: '#2c3e50'}
-            }
-        }
-    }
-});
 
 // Fade in animation observer
 const observer = new IntersectionObserver((entries) => {
@@ -1244,5 +794,7 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('section').forEach(el => observer.observe(el));
 </script>
 
+</section>
+    
 </body>
 </html>
