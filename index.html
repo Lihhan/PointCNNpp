@@ -460,6 +460,22 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
 
 <!-- ResNet-18 原来的2个柱状图 -->
 <div id="resnetCharts">
+    <!-- 结论面板 - ResNet -->
+    <div class="conclusion-panel">
+        <div class="conclusion-title">Key Findings - ResNet-18 Backbone</div>
+        <div class="conclusion-content">
+            <div class="conclusion-item">
+                <span class="highlight">⚡ 4.2× Faster:</span> Our method achieves 4.2× faster execution compared to the next best baseline (fVDB)
+            </div>
+            <div class="conclusion-item">
+                <span class="highlight">💾 3.3× Less Memory:</span> We achieve 3.3× memory reduction compared to MinkowskiEngine while maintaining accuracy
+            </div>
+            <div class="conclusion-item">
+                <span class="highlight">🏆 Best Overall:</span> We achieve the best performance in both speed and memory efficiency across all tested frameworks
+            </div>
+        </div>
+    </div>
+    
     <div class="charts-resnet">
         <div class="chart-container">
             <div class="chart-title">ResNet-18 Execution Time Comparison</div>
@@ -474,6 +490,22 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
 
 <!-- Single Convolution的4张折线图 -->
 <div id="singleCharts" style="display:none">
+    <!-- 结论面板 - Single Convolution -->
+    <div class="conclusion-panel">
+        <div class="conclusion-title">Key Findings - Single Convolution Layer</div>
+        <div class="conclusion-content">
+            <div class="conclusion-item">
+                <span class="highlight">🚀 Consistent Speed Advantage:</span> Our method consistently outperforms all baselines across different input scales
+            </div>
+            <div class="conclusion-item">
+                <span class="highlight">📈 Scalable Performance:</span> Memory efficiency gap widens with larger point clouds - up to 20× better than KPConv
+            </div>
+            <div class="conclusion-item">
+                <span class="highlight">⭐ Training Efficiency:</span> We achieve 2-3× faster training time compared to traditional sparse convolution methods
+            </div>
+        </div>
+    </div>
+    
     <div class="charts">
         <div class="chart-container">
             <div class="chart-title">Inference Mode - Memory Usage</div>
@@ -517,6 +549,58 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
     color: white;
 }
 
+/* 结论面板样式 */
+.conclusion-panel {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px 0 30px 0;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.conclusion-title {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.conclusion-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.conclusion-item {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px 20px;
+    border-radius: 8px;
+    border-left: 4px solid #ffd700;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease;
+}
+
+.conclusion-item:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.highlight {
+    font-weight: bold;
+    color: #ffd700;
+    font-size: 16px;
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+.conclusion-item {
+    line-height: 1.6;
+    font-size: 14px;
+}
+
 /* ResNet图表布局 - 2个图横向排列 */
 .charts-resnet {
     display: grid;
@@ -549,6 +633,41 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
     margin-bottom: 15px;
     font-size: 16px;
     color: #333;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+    .conclusion-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .charts-resnet {
+        grid-template-columns: 1fr;
+    }
+    
+    .charts {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .conclusion-panel {
+        padding: 20px;
+        margin: 15px 0 25px 0;
+    }
+    
+    .conclusion-title {
+        font-size: 18px;
+    }
+    
+    .conclusion-item {
+        padding: 12px 15px;
+    }
+    
+    .highlight {
+        font-size: 14px;
+    }
 }
 
 /* 淡入效果 */
