@@ -450,8 +450,8 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
 <h2>Performance Comparison</h2>
 
 <div class="toggle">
-<button id="btnRes" class="active">ResNet-18 Backbone</button>
-<button id="btnSingle">Single Convolution Layer</button>
+    <button id="btnRes" class="active">ResNet-18 Backbone</button>
+    <button id="btnSingle">Single Convolution Layer</button>
 </div>
 
 <div style="text-align: center; margin: 15px 0; color: #666; font-size: 14px;">
@@ -459,39 +459,307 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
 </div>
 
 <div id="resnetCharts">
-<div class="charts">
-<div class="chart-container"><canvas id="timeChart"></canvas></div>
-<div class="chart-container"><canvas id="memChart"></canvas></div>
-</div>
+    <div class="charts">
+        <div class="chart-container">
+            <div class="chart-title">Inference Mode</div>
+            <canvas id="inferenceMemoryChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Training Mode (i.e., with Back-Propagation)</div>
+            <canvas id="trainingMemoryChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Inference Mode</div>
+            <canvas id="inferenceTimeChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Back-Propagation Part in Training Mode</div>
+            <canvas id="trainingTimeChart"></canvas>
+        </div>
+    </div>
 </div>
 
 <div id="singleCharts" style="display:none">
     <div class="charts">
-        <div class="chart-container"><canvas id="singleMemoryChart"></canvas></div>
-        <div class="chart-container"><canvas id="singleTimeChart"></canvas></div>
-</div>
-</div>
-</div>
-</section>
-
-<!-- Results -->
-<section class="fade-in">
-  <div class="results-section">
-    <h2>Point Cloud Registration</h2>
-
-    <div class="image-comparison">
-      <div class="image-box">
-        <h3>KITTI</h3>
-        <img src="kitti_alignment.gif" alt="KITTI alignment result">
-      </div>
-
-      <div class="image-box">
-        <h3>3DMatch</h3>
-        <img src="3dmatch_alignment.gif" alt="3DMatch alignment result">
-      </div>
+        <div class="chart-container">
+            <div class="chart-title">Single Conv - Memory Usage</div>
+            <canvas id="singleMemoryChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">Single Conv - Time</div>
+            <canvas id="singleTimeChart"></canvas>
+        </div>
     </div>
-  </div>
-</section>
+</div>
+
+<script>
+// JSON数据和图表逻辑
+const benchmarkData = {
+    // ... 您提供的JSON数据 ...
+};
+
+// 框架配置
+const frameworkConfig = {
+    'kpconv': { name: 'KPConv', color: '#8B5CF6', solid: false },
+    'ocnn': { name: 'O-CNN', color: '#10B981', solid: false },
+    'fvdb': { name: 'fVDB', color: '#F59E0B', solid: false },
+    'minkowski': { name: 'MinkowskiEngine', color: '#3B82F6', solid: false },
+    'spconv': { name: 'SPConv', color: '#8B5A2B', solid: false },
+    'torchsparse': { name: 'TorchSparse++', color: '#FF6B35', solid: false },
+    'pointops_degraded': { name: 'Ours(degraded)', color: '#06B6D4', solid: true },
+    'pointops_normal': { name: 'Ours', color: '#DC2626', solid: true }
+};
+
+// 数据提取函数
+function extractData() {
+    const results = benchmarkData.results;
+    const inputSizes = results.map(r => Math.round(r.minkowski.input_size / 1000) + 'K');
+    
+    const datasets = {};
+    
+    Object.keys(frameworkConfig).forEach(framework => {
+        datasets[framework] = {
+            forward_memory: results.map(r => r[framework].forward_memory_gb),
+            backward_memory: results.map(r => r[framework].backward_memory_gb || r[framework].memory_gb),
+            forward_time: results.map(r => r[framework].forward_ms),
+            backward_time: results.map(r => r[framework].backward_ms || 0)
+        };
+    });
+    
+    return { inputSizes, datasets };
+}
+
+// 创建图表函数
+function createChart(ctx, data, yAxisType, yAxisLabel) {
+    const { inputSizes, datasets } = extractData();
+    
+    const chartDatasets = Object.keys(frameworkConfig).map(framework => {
+        const config = frameworkConfig[framework];
+        return {
+            label: config.name,
+            data: data[framework],
+            borderColor: config.color,
+            backgroundColor: config.color + '20',
+            borderWidth: config.solid ? 3 : 2,
+            borderDash: config.solid ? [] : [5, 5],
+            pointStyle: config.solid ? 'circle' : 'triangle',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: false,
+            tension: 0.1
+        };
+    });
+
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: inputSizes,
+            datasets: chartDatasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    type: yAxisType,
+                    title: {
+                        display: true,
+                        text: yAxisLabel
+                    },
+                    grid: {
+                        display: true,
+                        color: '#f0f0f0'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Input Size (Points/Voxels)'
+                    },
+                    grid: {
+                        display: true,
+                        color: '#f0f0f0'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 10
+                    },
+                    onClick: function(e, legendItem, legend) {
+                        const index = legendItem.datasetIndex;
+                        const chart = legend.chart;
+                        const meta = chart.getDatasetMeta(index);
+                        
+                        // 切换显示/隐藏
+                        meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+                        chart.update();
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+}
+
+// 初始化图表
+function initBenchmarkCharts() {
+    const { inputSizes, datasets } = extractData();
+    
+    // ResNet charts (使用single convolution数据模拟)
+    if (document.getElementById('inferenceMemoryChart')) {
+        createChart(
+            document.getElementById('inferenceMemoryChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].forward_memory])),
+            'logarithmic',
+            'Memory Usage (GB)'
+        );
+    }
+    
+    if (document.getElementById('trainingMemoryChart')) {
+        createChart(
+            document.getElementById('trainingMemoryChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].backward_memory])),
+            'logarithmic',
+            'Memory Usage (GB)'
+        );
+    }
+    
+    if (document.getElementById('inferenceTimeChart')) {
+        createChart(
+            document.getElementById('inferenceTimeChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].forward_time])),
+            'logarithmic',
+            'Time (ms)'
+        );
+    }
+    
+    if (document.getElementById('trainingTimeChart')) {
+        createChart(
+            document.getElementById('trainingTimeChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].backward_time])),
+            'logarithmic',
+            'Time (ms)'
+        );
+    }
+    
+    // Single convolution charts
+    if (document.getElementById('singleMemoryChart')) {
+        createChart(
+            document.getElementById('singleMemoryChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].backward_memory])),
+            'logarithmic',
+            'Memory Usage (GB)'
+        );
+    }
+    
+    if (document.getElementById('singleTimeChart')) {
+        createChart(
+            document.getElementById('singleTimeChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].forward_time.map((f, i) => f + datasets[k].backward_time[i])])),
+            'logarithmic',
+            'Time (ms)'
+        );
+    }
+}
+
+// 按钮切换功能
+document.addEventListener('DOMContentLoaded', function() {
+    const btnRes = document.getElementById('btnRes');
+    const btnSingle = document.getElementById('btnSingle');
+    const resnetCharts = document.getElementById('resnetCharts');
+    const singleCharts = document.getElementById('singleCharts');
+    
+    if (btnRes && btnSingle && resnetCharts && singleCharts) {
+        btnRes.addEventListener('click', function() {
+            this.classList.add('active');
+            btnSingle.classList.remove('active');
+            resnetCharts.style.display = 'block';
+            singleCharts.style.display = 'none';
+        });
+
+        btnSingle.addEventListener('click', function() {
+            this.classList.add('active');
+            btnRes.classList.remove('active');
+            resnetCharts.style.display = 'none';
+            singleCharts.style.display = 'block';
+        });
+    }
+    
+    // 初始化图表
+    initBenchmarkCharts();
+});
+</script>
+
+<style>
+.toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.toggle button {
+    padding: 10px 20px;
+    border: 2px solid #007bff;
+    background: white;
+    color: #007bff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.toggle button.active {
+    background: #007bff;
+    color: white;
+}
+
+.charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 20px 0;
+}
+
+.chart-container {
+    position: relative;
+    height: 400px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background: white;
+}
+
+.chart-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+#resnetCharts .charts {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+
+#singleCharts .charts {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+</style>
 
 <style>
 /* 淡入效果 */
