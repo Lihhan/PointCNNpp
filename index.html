@@ -472,24 +472,24 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
     </div>
 </div>
 
-<!-- Single Convolution的4张图 -->
+<!-- Single Convolution的4张折线图 -->
 <div id="singleCharts" style="display:none">
     <div class="charts">
         <div class="chart-container">
             <div class="chart-title">Inference Mode - Memory Usage</div>
-            <canvas id="singleMemInf"></canvas>
+            <canvas id="inferenceMemoryChart"></canvas>
         </div>
         <div class="chart-container">
             <div class="chart-title">Training Mode - Memory Usage</div>
-            <canvas id="singleMemTrain"></canvas>
+            <canvas id="trainingMemoryChart"></canvas>
         </div>
         <div class="chart-container">
             <div class="chart-title">Inference Mode - Time</div>
-            <canvas id="singleTimeInf"></canvas>
+            <canvas id="inferenceTimeChart"></canvas>
         </div>
         <div class="chart-container">
-            <div class="chart-title">Back-Propagation Part - Time</div>
-            <canvas id="singleTimeBack"></canvas>
+            <div class="chart-title">Training Mode - Time (Back-Propagation Part)</div>
+            <canvas id="trainingTimeChart"></canvas>
         </div>
     </div>
 </div>
@@ -568,6 +568,642 @@ Existing 3D point cloud methods face a precision-performance trade-off: point-ba
 // Chart.js defaults
 Chart.defaults.color = '#2c3e50';
 Chart.defaults.borderColor = 'rgba(44,62,80,0.1)';
+
+// JSON数据
+const benchmarkData = {
+  "metadata": {
+    "timestamp": "2025-12-19T13:57:20.694016",
+    "device": "cuda",
+    "total_tests": 8,
+    "test_type": "single_convolution",
+    "in_channels": 128,
+    "out_channels": 128,
+    "kernel_size": 3,
+    "voxel_size": 0.025,
+    "test_frameworks": [
+      "minkowski",
+      "torchsparse",
+      "pointops_degraded",
+      "pointops_normal",
+      "kpconv",
+      "spconv",
+      "ocnn",
+      "fvdb"
+    ],
+    "gpu_info": {
+      "device_name": "NVIDIA GeForce RTX 4090",
+      "device_count": 1,
+      "cuda_version": "12.1"
+    }
+  },
+  "results": [
+    {
+      "config_name": "scale_00_652K-745K_bs4",
+      "total_points": 2751894,
+      "voxel_size": 0.025,
+      "in_channels": 128,
+      "out_channels": 128,
+      "kernel_size": 3,
+      "data_source": "real",
+      "scale_bin": "scale_00_652K-745K",
+      "point_scale_factor": 1.0,
+      "test_timestamp": "2025-12-19T10:45:13.911127",
+      "minkowski": {
+        "forward_ms": 34.75111083984375,
+        "backward_ms": 83.42793426513671,
+        "forward_memory_gb": 1.63348388671875,
+        "backward_memory_gb": 2.074007511138916,
+        "memory_gb": 2.074007511138916,
+        "input_size": 460124
+      },
+      "torchsparse": {
+        "forward_ms": 18.779020309448242,
+        "backward_ms": 20.805572032928467,
+        "forward_memory_gb": 1.0030102729797363,
+        "backward_memory_gb": 1.3025016784667969,
+        "memory_gb": 1.3025016784667969,
+        "input_size": 459290
+      },
+      "pointops_degraded": {
+        "forward_ms": 13.440377616882325,
+        "backward_ms": 22.70805130004883,
+        "forward_memory_gb": 0.8324804306030273,
+        "backward_memory_gb": 0.8380260467529297,
+        "memory_gb": 0.8380260467529297,
+        "input_size": 459290
+      },
+      "pointops_normal": {
+        "forward_ms": 12.890092658996583,
+        "backward_ms": 21.315596771240234,
+        "forward_memory_gb": 0.8094983100891113,
+        "backward_memory_gb": 0.8147101402282715,
+        "memory_gb": 0.8147101402282715,
+        "input_size": 459290
+      },
+      "kpconv": {
+        "forward_ms": 697.9063510894775,
+        "backward_ms": 172.63695678710937,
+        "forward_memory_gb": 16.918646335601807,
+        "backward_memory_gb": 16.918646335601807,
+        "memory_gb": 16.918646335601807,
+        "input_size": 459290
+      },
+      "ocnn": {
+        "forward_ms": 116.28455810546875,
+        "backward_ms": 234.55740661621093,
+        "forward_memory_gb": 3.6777095794677734,
+        "backward_memory_gb": 4.481638431549072,
+        "memory_gb": 4.481638431549072,
+        "input_size": 459290
+      },
+      "spconv": {
+        "forward_ms": 15.25489628314972,
+        "backward_ms": 33.105048179626465,
+        "forward_memory_gb": 1.4344563484191895,
+        "backward_memory_gb": 1.9208102226257324,
+        "memory_gb": 1.9208102226257324,
+        "input_size": 460243
+      },
+      "fvdb": {
+        "forward_ms": 25.355958890914916,
+        "backward_ms": 39.89525475502014,
+        "forward_memory_gb": 1.852552890777588,
+        "backward_memory_gb": 2.3032851219177246,
+        "memory_gb": 2.3032851219177246,
+        "input_size": 459290
+      }
+    },
+    {
+      "config_name": "scale_01_748K-780K_bs4",
+      "minkowski": {
+        "forward_ms": 38.96415328979492,
+        "backward_ms": 93.2954116821289,
+        "forward_memory_gb": 1.8515253067016602,
+        "backward_memory_gb": 2.3498597145080566,
+        "input_size": 520793
+      },
+      "torchsparse": {
+        "forward_ms": 30.528644323349,
+        "backward_ms": 33.09786009788513,
+        "forward_memory_gb": 1.1242971420288086,
+        "backward_memory_gb": 1.4306988716125488,
+        "input_size": 522171
+      },
+      "pointops_degraded": {
+        "forward_ms": 14.13120002746582,
+        "backward_ms": 25.024716949462892,
+        "forward_memory_gb": 0.9401650428771973,
+        "backward_memory_gb": 0.9460797309875488,
+        "input_size": 522171
+      },
+      "pointops_normal": {
+        "forward_ms": 15.391545486450195,
+        "backward_ms": 23.931749725341795,
+        "forward_memory_gb": 0.9137353897094727,
+        "backward_memory_gb": 0.920036792755127,
+        "input_size": 522171
+      },
+      "kpconv": {
+        "forward_ms": 745.9071636199951,
+        "backward_ms": 165.418994140625,
+        "forward_memory_gb": 17.18361186981201,
+        "backward_memory_gb": 17.18361186981201,
+        "input_size": 522171
+      },
+      "ocnn": {
+        "forward_ms": 116.65873260498047,
+        "backward_ms": 243.53341064453124,
+        "forward_memory_gb": 3.8093619346618652,
+        "backward_memory_gb": 4.641934394836426,
+        "input_size": 522171
+      },
+      "spconv": {
+        "forward_ms": 16.101643800735474,
+        "backward_ms": 34.86465644836426,
+        "forward_memory_gb": 1.6018695831298828,
+        "backward_memory_gb": 2.1533007621765137,
+        "input_size": 521022
+      },
+      "fvdb": {
+        "forward_ms": 27.983680152893065,
+        "backward_ms": 43.907648372650144,
+        "forward_memory_gb": 2.06381893157959,
+        "backward_memory_gb": 2.568589210510254,
+        "input_size": 522171
+      }
+    },
+    {
+      "config_name": "scale_03_811K-839K_bs4",
+      "minkowski": {
+        "forward_ms": 41.0587516784668,
+        "backward_ms": 95.81404724121094,
+        "forward_memory_gb": 1.9613871574401855,
+        "backward_memory_gb": 2.490675926208496,
+        "input_size": 552369
+      },
+      "torchsparse": {
+        "forward_ms": 27.092671871185303,
+        "backward_ms": 30.94681191444397,
+        "forward_memory_gb": 1.256497859954834,
+        "backward_memory_gb": 1.7004117965698242,
+        "input_size": 553091
+      },
+      "pointops_degraded": {
+        "forward_ms": 15.540281677246094,
+        "backward_ms": 27.22588195800781,
+        "forward_memory_gb": 0.997957706451416,
+        "backward_memory_gb": 1.0042181015014648,
+        "input_size": 553091
+      },
+      "pointops_normal": {
+        "forward_ms": 15.308646392822265,
+        "backward_ms": 25.671507263183592,
+        "forward_memory_gb": 0.9677543640136719,
+        "backward_memory_gb": 0.9740147590637207,
+        "input_size": 553091
+      },
+      "kpconv": {
+        "forward_ms": 751.9614219665527,
+        "backward_ms": 176.19573669433595,
+        "forward_memory_gb": 18.200998306274414,
+        "backward_memory_gb": 18.200998306274414,
+        "input_size": 553091
+      },
+      "ocnn": {
+        "forward_ms": 118.70077362060547,
+        "backward_ms": 251.32987060546876,
+        "forward_memory_gb": 3.8101987838745117,
+        "backward_memory_gb": 4.637330055236816,
+        "input_size": 553091
+      },
+      "spconv": {
+        "forward_ms": 18.688787937164307,
+        "backward_ms": 35.39390754699707,
+        "forward_memory_gb": 1.710207462310791,
+        "backward_memory_gb": 2.2953810691833496,
+        "input_size": 552434
+      },
+      "fvdb": {
+        "forward_ms": 30.78859872817993,
+        "backward_ms": 47.78149147033692,
+        "forward_memory_gb": 2.230165481567383,
+        "backward_memory_gb": 2.756803512573242,
+        "input_size": 553091
+      }
+    },
+    {
+      "config_name": "scale_04_841K-897K_bs4",
+      "minkowski": {
+        "forward_ms": 42.397637939453126,
+        "backward_ms": 99.79927062988281,
+        "forward_memory_gb": 2.0347695350646973,
+        "backward_memory_gb": 2.5833773612976074,
+        "input_size": 572689
+      },
+      "torchsparse": {
+        "forward_ms": 31.39240002632141,
+        "backward_ms": 36.18008804321289,
+        "forward_memory_gb": 1.2884912490844727,
+        "backward_memory_gb": 1.7447762489318848,
+        "input_size": 571675
+      },
+      "pointops_degraded": {
+        "forward_ms": 15.93791332244873,
+        "backward_ms": 28.568505477905273,
+        "forward_memory_gb": 1.0359368324279785,
+        "backward_memory_gb": 1.0428247451782227,
+        "input_size": 571675
+      },
+      "pointops_normal": {
+        "forward_ms": 14.828953552246094,
+        "backward_ms": 31.26190071105957,
+        "forward_memory_gb": 1.0019254684448242,
+        "backward_memory_gb": 1.0083932876586914,
+        "input_size": 571675
+      },
+      "kpconv": {
+        "forward_ms": 710.8406066894531,
+        "backward_ms": 220.46344299316405,
+        "forward_memory_gb": 18.36767816543579,
+        "backward_memory_gb": 18.36767816543579,
+        "input_size": 571675
+      },
+      "ocnn": {
+        "forward_ms": 134.29083557128905,
+        "backward_ms": 282.8077087402344,
+        "forward_memory_gb": 4.201743125915527,
+        "backward_memory_gb": 5.107466220855713,
+        "input_size": 571675
+      },
+      "spconv": {
+        "forward_ms": 18.080488204956055,
+        "backward_ms": 38.45882797241211,
+        "forward_memory_gb": 1.7676429748535156,
+        "backward_memory_gb": 2.3739233016967773,
+        "input_size": 572627
+      },
+      "fvdb": {
+        "forward_ms": 31.697535610198976,
+        "backward_ms": 49.06352937221527,
+        "forward_memory_gb": 2.295748710632324,
+        "backward_memory_gb": 2.8467116355895996,
+        "input_size": 571675
+      }
+    },
+    {
+      "config_name": "scale_05_909K-1067K_bs4",
+      "minkowski": {
+        "forward_ms": 49.47312698364258,
+        "backward_ms": 112.34488983154297,
+        "forward_memory_gb": 2.3085012435913086,
+        "backward_memory_gb": 2.9318175315856934,
+        "input_size": 651827
+      },
+      "torchsparse": {
+        "forward_ms": 27.16454005241394,
+        "backward_ms": 39.03151607513428,
+        "forward_memory_gb": 1.5429606437683105,
+        "backward_memory_gb": 2.0939488410949707,
+        "input_size": 650629
+      },
+      "pointops_degraded": {
+        "forward_ms": 17.253376388549803,
+        "backward_ms": 28.231296157836915,
+        "forward_memory_gb": 1.158604621887207,
+        "backward_memory_gb": 1.1659550666809082,
+        "input_size": 650629
+      },
+      "pointops_normal": {
+        "forward_ms": 18.605887985229494,
+        "backward_ms": 28.145075225830077,
+        "forward_memory_gb": 1.133531093597412,
+        "backward_memory_gb": 1.1408815383911133,
+        "input_size": 650629
+      },
+      "kpconv": {
+        "forward_ms": 845.9425449371338,
+        "backward_ms": 229.83697204589845,
+        "forward_memory_gb": 20.38940191268921,
+        "backward_memory_gb": 20.38940191268921,
+        "input_size": 650629
+      },
+      "ocnn": {
+        "forward_ms": 89.70570373535156,
+        "backward_ms": 174.16291198730468,
+        "forward_memory_gb": 3.0169239044189453,
+        "backward_memory_gb": 3.6156005859375,
+        "input_size": 650629
+      },
+      "spconv": {
+        "forward_ms": 19.071364164352417,
+        "backward_ms": 41.60725975036621,
+        "forward_memory_gb": 2.0060172080993652,
+        "backward_memory_gb": 2.6942343711853027,
+        "input_size": 651975
+      },
+      "fvdb": {
+        "forward_ms": 34.809324741363525,
+        "backward_ms": 55.97612462043762,
+        "forward_memory_gb": 2.609246253967285,
+        "backward_memory_gb": 3.229367733001709,
+        "input_size": 650629
+      }
+    },
+    {
+      "config_name": "scale_06_1069K-1193K_bs4",
+      "minkowski": {
+        "forward_ms": 56.50554885864258,
+        "backward_ms": 129.44833374023438,
+        "forward_memory_gb": 2.686102867126465,
+        "backward_memory_gb": 3.410508632659912,
+        "input_size": 757090
+      },
+      "torchsparse": {
+        "forward_ms": 27.55583167076111,
+        "backward_ms": 34.39427590370178,
+        "forward_memory_gb": 1.6875519752502441,
+        "backward_memory_gb": 2.2306909561157227,
+        "input_size": 758014
+      },
+      "pointops_degraded": {
+        "forward_ms": 21.183884811401366,
+        "backward_ms": 36.518681335449216,
+        "forward_memory_gb": 1.35516357421875,
+        "backward_memory_gb": 1.3637137413024902,
+        "input_size": 758014
+      },
+      "pointops_normal": {
+        "forward_ms": 19.704422378540038,
+        "backward_ms": 34.728730010986325,
+        "forward_memory_gb": 1.3156695365905762,
+        "backward_memory_gb": 1.3242197036743164,
+        "input_size": 758014
+      },
+      "kpconv": {
+        "forward_ms": 1057.5130939483643,
+        "backward_ms": 355.89136657714846,
+        "forward_memory_gb": 24.33942985534668,
+        "backward_memory_gb": 24.33942985534668,
+        "input_size": 758014
+      },
+      "ocnn": {
+        "forward_ms": 136.17111206054688,
+        "backward_ms": 275.9371643066406,
+        "forward_memory_gb": 4.142975330352783,
+        "backward_memory_gb": 5.006106853485107,
+        "input_size": 758014
+      },
+      "spconv": {
+        "forward_ms": 23.303419589996338,
+        "backward_ms": 49.049283504486084,
+        "forward_memory_gb": 2.3220767974853516,
+        "backward_memory_gb": 3.123447895050049,
+        "input_size": 757198
+      },
+      "fvdb": {
+        "forward_ms": 40.41029977798462,
+        "backward_ms": 62.978869676589966,
+        "forward_memory_gb": 3.014847755432129,
+        "backward_memory_gb": 3.7505359649658203,
+        "input_size": 758014
+      }
+    },
+    {
+      "config_name": "scale_07_1201K-1423K_bs4",
+      "minkowski": {
+        "forward_ms": 57.985433959960936,
+        "backward_ms": 136.76277770996094,
+        "forward_memory_gb": 2.9724435806274414,
+        "backward_memory_gb": 3.775301933288574,
+        "input_size": 839938
+      },
+      "torchsparse": {
+        "forward_ms": 28.92657160758972,
+        "backward_ms": 34.140212059020996,
+        "forward_memory_gb": 1.7883057594299316,
+        "backward_memory_gb": 2.261963367462158,
+        "input_size": 837924
+      },
+      "pointops_degraded": {
+        "forward_ms": 21.674624252319337,
+        "backward_ms": 38.96234970092773,
+        "forward_memory_gb": 1.4947266578674316,
+        "backward_memory_gb": 1.5041699409484863,
+        "input_size": 837924
+      },
+      "pointops_normal": {
+        "forward_ms": 25.490803527832032,
+        "backward_ms": 34.59375991821289,
+        "forward_memory_gb": 1.4570670127868652,
+        "backward_memory_gb": 1.46651029586792,
+        "input_size": 837924
+      },
+      "kpconv": {
+        "forward_ms": 1193.8520908355713,
+        "backward_ms": 457.9191101074219,
+        "forward_memory_gb": 26.909396171569824,
+        "backward_memory_gb": 26.909396171569824,
+        "input_size": 837924
+      },
+      "ocnn": {
+        "forward_ms": 132.57543029785157,
+        "backward_ms": 268.58734741210935,
+        "forward_memory_gb": 4.02199649810791,
+        "backward_memory_gb": 4.8457350730896,
+        "input_size": 837924
+      },
+      "spconv": {
+        "forward_ms": 25.022972106933594,
+        "backward_ms": 50.865784645080566,
+        "forward_memory_gb": 2.5892791748046875,
+        "backward_memory_gb": 3.477585792541504,
+        "input_size": 840092
+      },
+      "fvdb": {
+        "forward_ms": 44.82888603210449,
+        "backward_ms": 72.40732831954956,
+        "forward_memory_gb": 3.3817477226257324,
+        "backward_memory_gb": 4.183815956115723,
+        "input_size": 837924
+      }
+    },
+    {
+      "config_name": "scale_08_1507K-2145K_bs4",
+      "minkowski": {
+        "forward_ms": 71.38451843261718,
+        "backward_ms": 170.84207153320312,
+        "forward_memory_gb": 3.750694751739502,
+        "backward_memory_gb": 4.768017768859863,
+        "input_size": 1064385
+      },
+      "torchsparse": {
+        "forward_ms": 43.31751585006714,
+        "backward_ms": 50.39851999282837,
+        "forward_memory_gb": 2.262065887451172,
+        "backward_memory_gb": 2.865335464477539,
+        "input_size": 1064692
+      },
+      "pointops_degraded": {
+        "forward_ms": 28.835142517089842,
+        "backward_ms": 49.79895706176758,
+        "forward_memory_gb": 1.8854308128356934,
+        "backward_memory_gb": 1.8974084854125977,
+        "input_size": 1064692
+      },
+      "pointops_normal": {
+        "forward_ms": 35.10579223632813,
+        "backward_ms": 48.69691543579101,
+        "forward_memory_gb": 1.836507797241211,
+        "backward_memory_gb": 1.8484854698181152,
+        "input_size": 1064692
+      },
+      "kpconv": {
+        "forward_ms": 1556.983232498169,
+        "backward_ms": 681.45537109375,
+        "forward_memory_gb": 34.17612028121948,
+        "backward_memory_gb": 34.17612028121948,
+        "input_size": 1064692
+      },
+      "ocnn": {
+        "forward_ms": 151.4483612060547,
+        "backward_ms": 324.56622314453125,
+        "forward_memory_gb": 4.702480316162109,
+        "backward_memory_gb": 5.663368225097656,
+        "input_size": 1064692
+      },
+      "spconv": {
+        "forward_ms": 31.126559734344482,
+        "backward_ms": 64.8185806274414,
+        "forward_memory_gb": 3.259995937347412,
+        "backward_memory_gb": 4.384753704071045,
+        "input_size": 1064497
+      },
+      "fvdb": {
+        "forward_ms": 55.97523050308227,
+        "backward_ms": 90.88311867713928,
+        "forward_memory_gb": 4.262639045715332,
+        "backward_memory_gb": 5.282435417175293,
+        "input_size": 1064692
+      }
+    }
+  ]
+};
+
+// 映射框架名称到显示名称和样式
+const frameworkConfig = {
+    'kpconv': { name: 'KPConv', color: '#8B5CF6', solid: false },
+    'ocnn': { name: 'O-CNN', color: '#10B981', solid: false },
+    'fvdb': { name: 'fVDB', color: '#F59E0B', solid: false },
+    'minkowski': { name: 'MinkowskiEngine', color: '#3B82F6', solid: false },
+    'spconv': { name: 'SPConv', color: '#8B5A2B', solid: false },
+    'torchsparse': { name: 'TorchSparse++', color: '#FF6B35', solid: false },
+    'pointops_degraded': { name: 'Ours(degraded)', color: '#06B6D4', solid: true },
+    'pointops_normal': { name: 'Ours', color: '#DC2626', solid: true }
+};
+
+// 提取数据函数
+function extractData() {
+    const results = benchmarkData.results;
+    const inputSizes = results.map(r => Math.round(r.minkowski.input_size / 1000) + 'K');
+    
+    const datasets = {};
+    
+    Object.keys(frameworkConfig).forEach(framework => {
+        datasets[framework] = {
+            forward_memory: results.map(r => r[framework].forward_memory_gb),
+            backward_memory: results.map(r => r[framework].backward_memory_gb || r[framework].memory_gb),
+            forward_time: results.map(r => r[framework].forward_ms),
+            backward_time: results.map(r => r[framework].backward_ms || 0)
+        };
+    });
+    
+    return { inputSizes, datasets };
+}
+
+// 创建折线图函数
+function createLineChart(ctx, data, yAxisType, yAxisLabel) {
+    const { inputSizes, datasets } = extractData();
+    
+    const chartDatasets = Object.keys(frameworkConfig).map(framework => {
+        const config = frameworkConfig[framework];
+        return {
+            label: config.name,
+            data: data[framework],
+            borderColor: config.color,
+            backgroundColor: config.color + '20',
+            borderWidth: config.solid ? 3 : 2,
+            borderDash: config.solid ? [] : [5, 5],
+            pointStyle: config.solid ? 'circle' : 'triangle',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: false,
+            tension: 0.1
+        };
+    });
+
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: inputSizes,
+            datasets: chartDatasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    type: yAxisType,
+                    title: {
+                        display: true,
+                        text: yAxisLabel
+                    },
+                    grid: {
+                        display: true,
+                        color: '#f0f0f0'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Input Size (Points/Voxels)'
+                    },
+                    grid: {
+                        display: true,
+                        color: '#f0f0f0'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 10
+                    },
+                    onClick: function(e, legendItem, legend) {
+                        const index = legendItem.datasetIndex;
+                        const chart = legend.chart;
+                        const meta = chart.getDatasetMeta(index);
+                        
+                        // 切换显示/隐藏
+                        meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+                        chart.update();
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+}
 
 // Toggle functionality
 document.addEventListener('DOMContentLoaded', function() {
@@ -674,112 +1310,48 @@ function initializeAllCharts() {
         });
     }
 
-    // ===== Single convolution layer charts (4张图) =====
-    const singleMethods = ['KPConv', 'O-CNN', 'Minkowski', 'TorchSparse++', 'SPConv', 'fVDB', 'Ours (deg.)', 'Ours'];
-    const singleColors = ['#8B5CF6','#10B981','#3B82F6','#FF6B35','#8B5A2B','#F59E0B','#06B6D4','#DC2626'];
+    // ===== Single convolution layer charts (4张折线图) =====
+    const { inputSizes, datasets } = extractData();
     
-    // 平均数据
-    const avgMemInf = [12.71, 3.83, 2.24, 1.39, 3.94, 2.59, 1.19, 1.16];
-    const avgMemTrain = [19.15, 4.67, 2.87, 1.89, 6.47, 3.22, 1.20, 1.17];
-    const avgTimeInf = [896.49, 112.13, 46.70, 26.25, 19.75, 34.64, 17.35, 18.06];
-    const avgTimeBack = [168.69, 241.28, 116.55, 34.54, 74.40, 54.45, 31.17, 29.65];
-
-    // Single Memory Inference
-    if (document.getElementById('singleMemInf')) {
-        new Chart('singleMemInf', {
-            type: 'bar',
-            data: {
-                labels: singleMethods,
-                datasets: [{
-                    label: 'Memory (GB)',
-                    data: avgMemInf,
-                    backgroundColor: singleColors.map(c => c + '80'),
-                    borderColor: singleColors,
-                    borderWidth: 2
-                }]
-            },
-            options: getChartOptions('Memory (GB)', false)
-        });
+    // Single Inference Memory
+    if (document.getElementById('inferenceMemoryChart')) {
+        createLineChart(
+            document.getElementById('inferenceMemoryChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].forward_memory])),
+            'logarithmic',
+            'Memory Usage (GB)'
+        );
     }
-
-    // Single Memory Training
-    if (document.getElementById('singleMemTrain')) {
-        new Chart('singleMemTrain', {
-            type: 'bar',
-            data: {
-                labels: singleMethods,
-                datasets: [{
-                    label: 'Memory (GB)',
-                    data: avgMemTrain,
-                    backgroundColor: singleColors.map(c => c + '80'),
-                    borderColor: singleColors,
-                    borderWidth: 2
-                }]
-            },
-            options: getChartOptions('Memory (GB)', false)
-        });
+    
+    // Single Training Memory
+    if (document.getElementById('trainingMemoryChart')) {
+        createLineChart(
+            document.getElementById('trainingMemoryChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].backward_memory])),
+            'logarithmic',
+            'Memory Usage (GB)'
+        );
     }
-
-    // Single Time Inference
-    if (document.getElementById('singleTimeInf')) {
-        new Chart('singleTimeInf', {
-            type: 'bar',
-            data: {
-                labels: singleMethods,
-                datasets: [{
-                    label: 'Time (ms)',
-                    data: avgTimeInf,
-                    backgroundColor: singleColors.map(c => c + '80'),
-                    borderColor: singleColors,
-                    borderWidth: 2
-                }]
-            },
-            options: getChartOptions('Time (ms)', true)
-        });
+    
+    // Single Inference Time
+    if (document.getElementById('inferenceTimeChart')) {
+        createLineChart(
+            document.getElementById('inferenceTimeChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].forward_time])),
+            'logarithmic',
+            'Time (ms)'
+        );
     }
-
-    // Single Time Backward
-    if (document.getElementById('singleTimeBack')) {
-        new Chart('singleTimeBack', {
-            type: 'bar',
-            data: {
-                labels: singleMethods,
-                datasets: [{
-                    label: 'Time (ms)',
-                    data: avgTimeBack,
-                    backgroundColor: singleColors.map(c => c + '80'),
-                    borderColor: singleColors,
-                    borderWidth: 2
-                }]
-            },
-            options: getChartOptions('Time (ms)', true)
-        });
+    
+    // Single Training Time
+    if (document.getElementById('trainingTimeChart')) {
+        createLineChart(
+            document.getElementById('trainingTimeChart').getContext('2d'),
+            Object.fromEntries(Object.keys(datasets).map(k => [k, datasets[k].backward_time])),
+            'logarithmic',
+            'Time (ms)'
+        );
     }
-}
-
-// 通用图表配置函数
-function getChartOptions(yLabel, isLogarithmic) {
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {display: false}
-        },
-        scales: {
-            y: {
-                type: isLogarithmic ? 'logarithmic' : 'linear',
-                beginAtZero: !isLogarithmic,
-                min: isLogarithmic ? 10 : undefined,
-                title: {display: true, text: yLabel, color: '#2c3e50'},
-                grid: {color: 'rgba(44,62,80,0.1)'},
-                ticks: {color: '#2c3e50'}
-            },
-            x: {
-                grid: {color: 'rgba(44,62,80,0.05)'},
-                ticks: {color: '#2c3e50', maxRotation: 45}
-            }
-        }
-    };
 }
 
 // Fade in animation observer
